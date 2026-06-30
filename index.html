@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medieval History Quiz · 3rd semester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f4f2eb;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 2rem 1rem;
+            color: #1e2b3c;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            border-left: 8px solid #8b3a2b;
+            padding-left: 1.5rem;
+            margin-bottom: 2.5rem;
+            color: #1e2b3c;
+            background: linear-gradient(to right, #f4f2eb, #e8e4d9);
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 20px 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .question-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.8rem 2rem 2rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.1s ease;
+            border: 1px solid #e7e2d6;
+        }
+        .question-card:hover {
+            border-color: #c9b8a6;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+        }
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+            display: flex;
+            gap: 0.75rem;
+        }
+        .q-number {
+            color: #8b3a2b;
+            font-weight: 600;
+            min-width: 2.4rem;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-top: 0.2rem;
+        }
+        .option {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+            padding: 0.4rem 0 0.4rem 0.8rem;
+            border-radius: 12px;
+            transition: background 0.1s;
+            font-size: 1rem;
+            border-left: 3px solid transparent;
+        }
+        .option:hover {
+            background: #f6f3ed;
+            border-left-color: #b8a48c;
+        }
+        .option input[type="radio"] {
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+            accent-color: #7f4b3a;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+        .option label {
+            cursor: pointer;
+            line-height: 1.45;
+            color: #1e2b3c;
+        }
+        .correct-badge {
+            margin-left: 0.8rem;
+            font-weight: 500;
+            color: #2d6a4f;
+            background: #e4f0e8;
+            padding: 0.1rem 0.9rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+            border: 1px solid #b6d0bf;
+            white-space: nowrap;
+        }
+        .correct-badge::before {
+            content: "✓ ";
+        }
+        .answer-hint {
+            margin-top: 0.6rem;
+            font-size: 0.9rem;
+            color: #4f5d6b;
+            background: #f0ede7;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            border: 1px solid #d9d1c4;
+        }
+        .quiz-controls {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            background: #e8e3d9;
+            padding: 0.8rem 1.8rem;
+            border-radius: 60px;
+            justify-content: center;
+        }
+        .quiz-controls button {
+            background: #7f4b3a;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1.8rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .quiz-controls button:hover {
+            background: #623b2e;
+        }
+        .quiz-controls .reset-btn {
+            background: #4f5d6b;
+        }
+        .quiz-controls .reset-btn:hover {
+            background: #3a4652;
+        }
+        .score-box {
+            font-weight: 500;
+            background: #d9d1c4;
+            padding: 0.3rem 1.5rem;
+            border-radius: 40px;
+            font-size: 1rem;
+        }
+        hr {
+            margin: 2.2rem 0 2rem 0;
+            border: none;
+            border-top: 1px solid #ddd6c9;
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #706a5e;
+            padding: 1.5rem 0 0.5rem;
+        }
+        @media (max-width: 650px) {
+            .question-card { padding: 1.5rem; }
+            .q-text { font-size: 1.05rem; flex-wrap: wrap; }
+            .option { padding-left: 0.2rem; }
+            .correct-badge { margin-left: 0.3rem; font-size: 0.7rem; padding: 0.1rem 0.7rem; }
+            .quiz-controls { padding: 0.6rem 1rem; border-radius: 30px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏰 Medieval history · 3rd semester</h1>
+
+    <div class="quiz-controls">
+        <button id="checkBtn">✅ Check answers</button>
+        <button id="resetBtn" class="reset-btn">⟳ Reset</button>
+        <span class="score-box" id="scoreDisplay">0 / 0</span>
+    </div>
+
+    <div id="quiz-container"></div>
+    <div class="footer-note">✧ 150+ questions · select your answer, then check ✧</div>
+</div>
+
+<script>
+    (function() {
+        // ----- original data (correct answer marked with "+") -----
+        const rawQuestions = [
+            { q: "Frederick I knelt down and begged for forgiveness from the Pope.", options: ["+1177-year", "=1171-year", "=1077-year", "=1170-year"] },
+            { q: "In which centuries did the German economy rise?", options: ["+XIII-XV centuries", "=XIII-XIV centuries", "=XII-XV centuries", "=XII-XVI centuries"] },
+            { q: "When were the Union of Swabian Cities be formed?.", options: ["+middle of the XIV th century", "= middle of the XV th century", "= middle of the XVI th century", "= middle of the XVII th century"] },
+            { q: "Where did Henry IV pass with his revelations and who did he repent to in the Canossa castle?", options: ["+ Crossing the Alps to Gregory VII", "=Crossing the Alps to Gregory VI", "=Crossing the Himalayas to Friedrich", "=Passing the Alps, to Grigory V"] },
+            { q: "What is the period from the end of the Vth century to the end of the XVth century AD called?", options: ["+\"Medieval history\"", "=\" History of the Ancient World\"", "=\"New History\"", "=\"The most recent history \""] },
+            { q: "The history of the Middle Ages is divided into several major periods?", options: ["+ 3", "= 2", "= 4", "= 5"] },
+            { q: "How many centuries the first period of the Middle Ages includes?", options: ["+ V-XI centuries", "= I-V centuries", "= XI-XXV centuries", "= XV-XVII centuries"] },
+            { q: "How many centuries the second period of the Middle Ages includes?", options: ["+ XI-XV centuries", "=V-XI centuries", "= I-V centuries", "= XV-XVII centuries"] },
+            { q: "There are several main types of sources related to the history of the Middle Ages?", options: ["+ 2", "=3", "= 4", "= 5"] },
+            { q: "When were the printing presses created in China?", options: ["+ XI century", "= X century", "= IX century", "= XII century"] },
+            { q: "When were printing presses created in Europe?", options: ["+ XV century", "=XIV century", "= XIII century", "= XVI century"] },
+            { q: "How many centuries entered the history of Europe under the name \"Great migrations of peoples\"?", options: ["+ IV-VI centuries", "= I-III centuries", "= VII-VIII centuries", "= IX-XI centuries"] },
+            { q: "Who initiated the process of \"great migrations of people\"?", options: ["+ Huns", "= Slavs", "= Arabs", "= Germans"] },
+            { q: "As a result of the increase in the population of the Germanic tribes, the increase in the demand for new land and the increase in property stratification encourage them to occupy new territories. What caused this?", options: ["+ \" Great migrations of people \"", "= \" Great geographical discoveries\"", "= \"The Hundred Years' War\"", "= \"Cold War \""] },
+            { q: "The attacks of the Huns from the East from the 4th century forced many barbarian tribes to move from their places. What caused this?", options: ["+ \" Great migrations of people \"", "= \" Great geographical discoveries\"", "= \"The Hundred Years' War\"", "= \"Cold War\""] },
+            { q: "In Europe, the beginning of the cold climate from the 2nd century turned the cultivated fields into reserves, and the water bodies and the lands near them into swamps by the 5th century. What caused this?", options: ["+ \" Great migrations of people \"", "= \" Great geographical discoveries\"", "= \"The Hundred Years' War\"", "= \"Cold War\""] },
+            { q: "In what century, the Huns' attacks from the East increased, forcing the barbarian tribes to move from their lands?", options: ["+ IV century", "= II century", "= III century", "= I century"] },
+            { q: "In Europe, the climate began to cool?", options: ["+ II century", "= I century", "= III century", "= IV century"] },
+            { q: "the beginning of the cold climate in Europe turned the cultivated fields into reserves, and the water bodies and the lands near them into swamps?", options: ["+ V century", "= VI century", "= VII century", "=VIII century"] },
+            { q: "Where were the ancient Germanic tribes (Franks, Visigoths, Ostrogoths, Vandals, Burgundians, Lombards) located?", options: ["+ In the basin of the Rhine and Elbe rivers", "=In the basin of the Euphrates and Tigris rivers", "= In the basin of the Volga and Ural rivers", "=in the Amudarya and Syrdarya basins"] },
+            { q: "What was the main training of the Germans?", options: ["+ Animal husbandry", "= Farming", "= Craftsmanship", "= Trade"] },
+            { q: "What increased labor productivity and yield in the Germans?", options: ["+ Transition from plow to iron plough", "= Wars of aggression", "= Phosphorus discovery", "= Emergence of the state"] },
+            { q: "What did the Romans call all the peoples who lived outside of Rome and spoke an unknown language?", options: ["+ \"Barbarians\"", "= \"Jacks\"", "= \"Vikings\"", "= \"Varyangs\""] },
+            { q: "Who wrote that the Germans knew how to mine and smelt iron and other minerals?", options: ["+ Tacitus", "= Mauritius", "= Arrian", "= Julius Caesar"] },
+            { q: "In whose works can we find rich information about the history of the ancient Germans?", options: ["+ \"Memoirs of the Gallic War\" by Julius Caesar, \"Germania\" by Tacitus", "= Arrian's Campaigns of Alexander, Quintus Curcius Rufus' History of Alexander the Great", "= \"History\" by Herodotus, \"Geography\" by Strabo", "= Homer's \"Illiad\", Dante's \"Divine Comedy\""] },
+            { q: "When did the Germans plant leguminous crops instead of spring and autumn wheat, divide the plowed land into two fields, sow grain in one, and plow the other to rest and change them every year?", options: ["+ IV century", "= II century", "= III century", "= I century"] },
+            { q: "What was considered the most important item in German domestic trade?", options: ["+ Iron products", "= Gold items", "= Silverware", "= Copper items"] },
+            { q: "What did the neighbors of the Germanic tribes deliver to the Romans?", options: ["+ Slaves, livestock, leather, amber", "= Fine jewelry, spools, jewelry, wine", "=Olive oil, grain, metals, carpet", "= Cotton seed, ship, weapons, salt"] },
+            { q: "What did the Germanic tribes get from the Romans?", options: ["+ Fine jewelry, spools, jewelry, wine", "= Slaves, livestock, leather, amber", "=Olive oil, grain, metals, carpet", "= Cotton seed, ship, weapons, salt"] },
+            { q: "What stage did the German community go through before the state was created?", options: ["+ Seed production team", "= Slavery", "= Feudalism", "= Primitive community"] },
+            { q: "In which centuries, the Germans had enough conditions for the seed-growing community to become a neighborhood community?", options: ["+ V-VI centuries", "= III-IV centuries", "= I-II centuries", "= VII-VIII centuries"] },
+            { q: "When the wealth inequality in the Germanic people increases, communities begin to be divided into rich and poor?", options: ["+ IV century", "= II century", "= III century", "= I century"] },
+            { q: "Hard, resinous and clear yellow ore?", options: ["+ Amber", "= Ruby", "= Diamond", "= Feruza"] },
+            { q: "What is the name of the head of the tribe, the family representative of the nobles, and the military leader of the Norman tribes?", options: ["+ Cong", "= Señor", "= Tungin", "= Vasilevs"] },
+            { q: "In which centuries, Germanic tribes began to unite into tribal alliances that controlled large territories?", options: ["+ IV-V cenuries", "= II cenuries", "= VI-VII cenuries", "= VIII-IX cenuries"] },
+            { q: "The largest Germanic tribes?", options: ["+ Alemann, Goth, Frank", "= Celtic, Pictish, Scottish", "= Hunn, Vandal, Turing", "= English, Saxon, Jut"] },
+            { q: "The original barbarian state?", options: ["+ Kingdom of Visigoths", "= Kingdom of the Franks", "= Vandal kingdom", "= Ostrogothic kingdom"] },
+            { q: "A barbarian state formed in the Iberian Peninsula and a part of Gaul at the beginning of the 5th century?", options: ["+ Kingdom of Visigoths", "= Kingdom of the Franks", "= Vandal kingdom", "= Ostgothic kingdom"] },
+            { q: "Where did the Vandals conquer and form their country?", options: ["+ North Africa", "= Britain", "= Gaul", "= Italy"] },
+            { q: "Where did the Ostgoths conquer and form their country?", options: ["+ Italy", "= Britain", "= Gaul", "= North Africa"] },
+            { q: "Where did the Franks conquer and form their country?", options: ["+ Gaul", "= Britain", "= Italy", "= North Africa"] },
+            { q: "Where did the Anglo-Saxons conquer and form their country?", options: ["+ Britain", "= Italy", "= Gaul", "= North Africa"] },
+            { q: "When did the Western Roman Empire fall?", options: ["+ 476 year", "= year 486", "= year 534", "= year 536"] },
+            { q: "Which tribes lived in the lower reaches of the Rhine before the Great Migrations?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "Whose appearance is very different from other Germanic tribes?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "Who wore clothes made of cloth, not animal skins like the Goths and Lombards, and wore their hair and beards?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "In which countries only members of the royal family could walk with long hair?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "After the collapse of the Western Roman Empire, who will establish an independent principality in Gaul, which is adjacent to the Franks?", options: ["+ Egidi", "= Siagri", "= Hilperic", "= Desiderius"] },
+            { q: "Who leads the Frankish invasion of Gaul?", options: ["+ Clovis", "= Charlemagne", "= Carl Martell", "= Pippin Short"] },
+            { q: "Who founded the Frankish state?", options: ["+ Clovis", "= Charlemagne", "= Carl Martell", "= Pippin Short"] },
+            { q: "When was the Frankish state founded?", options: ["+ 486 year", "= year 476", "= year 534", "= year 536"] },
+            { q: "Who built the country was originally named after the dynasties?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "From what century did the region around Paris become the basis for the name of the country, Ile de France, and it began to be called France?", options: ["+ in the 10th century", "= in the IXcentury", "= in the XI century", "= in the XII century"] },
+            { q: "Who among the leaders of the barbarian tribes was the first to accept Christianity from Rome?", options: ["+ Clovis", "= Charles the Great", "= Carl Martell", "= Pippin Short"] },
+            { q: "Whose conversion to Christianity one of the Romans wrote \"your new religion is our victory!\"?", options: ["+ Clovis", "= Charles the Great", "= Carl Martell", "= Pippin Short"] },
+            { q: "Whose conversion to Christianity ensures that he will exercise the Gallebishopric, which has a strong influence among the population?", options: ["+ Clovis", "= Charles the Great", "= Carl Martell", "= Pippin Short"] },
+            { q: "Whose sons were Hildebert, Chlothar, Chlodomer, and Theodoric?", options: ["+ Clovis", "= Charles the Great", "= Carl Martell", "= Pippin Short"] },
+            { q: "What was the name of the land that the lord gave to his vassal in exchange for military service?", options: ["+ Beneficiary", "= Patta", "= Allod", "= Domain"] },
+            { q: "In the Middle Ages in Western Europe, what was the name of a landowner who had dependent peasants and small feudal vassals at his disposal?", options: ["+ Señor", "= Konung", "= Tungin", "= Vasilevs"] },
+            { q: "What does the word senor mean in Latin??", options: ["+ Big", "= Master", "= Consultant", "= Cavalry"] },
+            { q: "What is the name of the procedure of subordination of one feudal lord to another feudal lord in Western European countries?", options: ["+ Vassalage", "= Separatism", "= Hegemony", "= Monarchy"] },
+            { q: "Where was the Frankish kingdom founded?", options: ["+ in Northern Gaul", "= in North Africa", "= in Britain", "= in Southern Italy"] },
+            { q: "Find the correct answer of Germanic tribes?", options: ["+ Turing, German, Bavarian.", "= Goth, Frankish, Slavic", "= Hunn, English, Saxon", "= Vandal, Persian, Scythian"] },
+            { q: "In the Franks, during the time of Clovis, the country was divided into provinces, which were ruled by the king?", options: ["+ Count", "= Hergos", "= Sheriff", "= Markgraf"] },
+            { q: "In which country counts ruled the provinces?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "Who adopted the tax system of the Franks?", options: ["+ From the Romans", "= From the Greeks", "= Of the Egyptians", "= from the Arabs"] },
+            { q: "In the Franks, the basis of local government was formed by the hundreds of free Franks, and what was the name of its head, centurion?", options: ["+ Tungins", "= Señor", "= Konung", "= Vasilevs"] },
+            { q: "From the end of the 6th century, the check lands of the Franks became the property of the peasant family, which could be sold or donated?", options: ["+ Allod", "= Patta", "= Beneficiary", "= Domain"] },
+            { q: "Full ownership of the land: what was the name of the land-property that was inherited from generation to generation in the feudal society in Western Europe?", options: ["+ Allod", "= Patta", "= Beneficiary", "= Domain"] },
+            { q: "In the Franks, during the reign of which king issued a new law confirming the right to transfer the land to the daughter, sister or brother of the deceased, not to the community as before, if there is no son heir?", options: ["+ Hilperic", "= Egidius", "= Siagri", "= Desiderius"] },
+            { q: "\"Sali's Truth\" is a set of whose laws?", options: ["+ Franks", "= Saxons", "= Alernans", "= Vandals"] },
+            { q: "\"Sali's Truth\" was written on whose orders?", options: ["+ Clovis", "= Charles the Great", "= Carl Martell", "= Pippin Short"] },
+            { q: "Who lived in 742-814?", options: ["+ Charles the Great", "= Hilperic", "= Pippin Short", "= Clovis"] },
+            { q: "Who lived in 714-768?", options: ["+ Pippin Short", "= Hilperic", "= Clovis", "= Charles the Great"] },
+            { q: "Who ruled the kingdom of the Franks from 768-814?", options: ["+ Charles the Great", "= Pippin Short", "= Hilperic", "= Clovis"] },
+            { q: "Who ruled the kingdom of the Franks from 800?", options: ["+ Charles the Great", "= Clovis", "= Pippin Short", "= Hilperic"] },
+            { q: "Who founded the Carolingian dynasty in the Frankish state?", options: ["+ Charles the Great", "= Clovis", "= Pippin Short", "= Hilperic"] },
+            { q: "How many years did Charles the Great rule the kingdom of the Franks?", options: ["+ 46 year", "= 48 year", "= 49 year", "= 47 year"] },
+            { q: "From whose name the title \"Korol\", i.e. \"King\" originated?", options: ["+ Charles the Great", "= Clovis", "= Pippin Short", "= Hilperic"] },
+            { q: "When did Charles the Great's first military campaigns begin?", options: ["+ 773 year", "= 770 year", "= 73 year", "= 775 year"] },
+            { q: "Where did the Lombard tribe of Germans form a state?", options: ["+ in Italy", "= in Gaul", "= in Britain", "= in Spain"] },
+            { q: "Charles the Great, who conquered Italy, the Italian lands …", options: ["+ were divided into counties", "= belonged to duchies", "= given the right to freedom", "= duty paid compensation"] },
+            { q: "Find the territory conquered by the Arab Caliphate?", options: ["+ Spain", "= Italy", "= Saxony", "= Denmark"] },
+            { q: "What was considered a symbol of the throne in Europe in the early Middle Ages?", options: ["+ Long beard", "= Long hair", "= Beard and cane", "= Ring"] },
+            { q: "When did Charles the Great make his first unsuccessful invasion of Spain?", options: ["+ 778 years", "= 775 years", "= 773 years", "= 772 years"] },
+            { q: "In the battle against the Arabs in Spain, the nephew of Charles the Great, the count ... died?", options: ["+ Roland", "= Hilperic", "= Ludovic", "= Lothar"] },
+            { q: "What was established in the territories of the Iberian Peninsula taken from the Arabs during the subsequent campaigns of Charles the Great?", options: ["+ Spanish mark", "= Kingdom of the Lombards", "= Italian state", "= An independent kingdom"] },
+            { q: "Charles the Great's wars against which tribes lived on the right bank of the Rhine lasted for more than 30 years (772-804)?", options: ["+ Sax", "= Ostrogoth", "= Visigoth", "= Vandal"] },
+            { q: "Find the largest Germanic tribe that did not obey Charls the Great?", options: ["+ Sax", "= Ostrogoth", "= Visigoth", "= Vandal"] },
+            { q: "Roman local nobles rebelled against which Pope?", options: ["+ Lev III", "= Innocent III", "= Urban II", "= Lev II"] },
+            { q: "When did the Pope crown Charles the Great as emperor?", options: ["+ 800 years", "= 802 years", "=801 years", "= 804 years"] },
+            { q: "Which Pope crowned Charles the Great as emperor?", options: ["+ Lev III", "= Urban II", "= Innocent III", "= Lev II"] },
+            { q: "What word does the word knight come from?", options: ["+ German", "= English", "= French", "= Latin"] },
+            { q: "Which country did not have a permanent capital in the Middle Ages?", options: ["+ The state of Charles the Great", "= Hilperic state", "= Clovis state", "= Pippin Pakana state"] },
+            { q: "What is the meaning of knight from the word \"ritter\"?", options: ["+ Land owner", "= Brand", "= Arms Cavalry", "= Property"] },
+            { q: "Which word means fortress, property in German?", options: ["+ Feud", "= Graph", "= Mark", "= Knight"] },
+            { q: "Who ruled the large tribes in the Frankish state?", options: ["+ Graphs", "= Barons", "= Knights", "= Dukes"] },
+            { q: "Which historical term in German means an elected military leader, later a hereditary tribal chief?", options: ["+ Duke", "= Knight", "= Baron", "= Graph"] },
+            { q: "In the Frankish state, which title became one of the highest titles over time?", options: ["+ Duke", "= Knight", "= Baron", "= Graph"] },
+            { q: "Which historical term means an official appointed by the king?", options: ["+ Graf", "= Duke", "= Knight", "= Baron"] },
+            { q: "What did Charles the Great build to strengthen the borders of his country?", options: ["+ Mark", "= Army", "= Kingdom", "= Feud"] },
+            { q: "Which historical term means a German frontier military province?", options: ["+ Mark", "= Army", "= Kingdom", "= Feud"] },
+            { q: "Which historical term means governor of a German border region?", options: ["+ Markgraph", "= Duke", "= Baron", "= Graph"] },
+            { q: "Which Arab caliph, through his ambassadors, presented Charlemagne with valuable gifts and the land where the tomb of Jesus is located in Jerusalem?", options: ["+ Harun al-Rashid", "= Caliph Ma'mun", "= Nasr ibn Sayyar", "= Caliph Muawiya I"] },
+            { q: "When was the Treaty of Verdun signed?", options: ["+ in 843", "= in 844", "= in 845", "= in 842"] },
+            { q: "What countries will be formed in the place of the Frankish Empire?", options: ["+ France, Germany, Italy", "= England, France, Italy", "= France, Spain, Italy", "= France, Germany, Spain"] },
+            { q: "When did the Roman legions leave Britain and return to Italy?", options: ["+ in 407", "= in 408", "= in 405", "= in 406"] },
+            { q: "Indigenous people of Britain?", options: ["+ Celtic, Pictish, Scots", "= Angle, Pict, Scot", "= English, Jut, Frisian", "= Angles, Saxons and Jutes"] },
+            { q: "Which tribes from the north attack the Celts in the British Isles?", options: ["+ Pict, Scot", "= Pict, eat", "= English, Jut, Frisian", "= Angle, Pict, Scot"] },
+            { q: "For protection from the Picts, the Britts (Celts) first invited drujinas from which Germanic tribes?", options: ["+ English, Saxon and Jut", "= English, Jut, Frisian", "= English, Frisian, Scot", "= Celtic, Frisian, Scot"] },
+            { q: "Which tribes lived in northern Germany and the Jutland peninsula?", options: ["+ English, Saxon and Jut", "= Celtic, Frisian, Scot", "= English, Jut, Frisian", "= English, Frisian, Scot"] },
+            { q: "Which region of Britain did the Jutes conquer in the middle of the Vth century?", options: ["+ Kent", "= Armorica", "= Wessex", "= Essex"] },
+            { q: "In order to protect themselves from the Anglo-Saxons and the Jutes who invaded Britain, the Celts moved to which region of the European continent?", options: ["+ Armorica", "= Kent", "= Essex", "= Wessex"] },
+            { q: "Where is the province of Armorica located?", options: ["+ In the north-west of France", "= North of England", "= in the north-west of Italy", "= South of France"] },
+            { q: "What is the name of the Armorica region after the mass migration of the Britons?", options: ["+ Brittany", "= Norman", "= Aquitaine", "= Germany"] },
+            { q: "At the beginning of the VIth century, which person who was one of the last Romans on the island of Britain united the Britons and began to resist the Germans?", options: ["+ Ambrose Aurelian", "= King Ecbert", "= Lancelot", "= King Arthur"] },
+            { q: "Many false historical legends are woven in the person of which person in England in the VIth century?", options: ["+ Ambrose Aurelian", "= Lancelot Ambrose Aurelian", "= King Ecbert", "= King Arthur"] },
+            { q: "Who was the wizard who was a companion of King Arthur?", options: ["+ Merlin", "= Ambrose", "= Lancelot", "= Geneva"] },
+            { q: "How many kingdoms did the Anglo-Saxons form in Britain?", options: ["+ 7", "= 6", "= 8", "= 5"] },
+            { q: "Britaniyada angllar yashagan qaysi viloyat shevasi tobora keng qo`llanila boshlanadi?", options: ["+ Mersiya", "= Kent", "= Nortumbriya", "= Sharqiy Angliya"] },
+            { q: "When will the Normans sack and burn London?", options: ["+ in 842", "= in 840", "= in 843", "= in 841"] },
+            { q: "Almost all of the Anglo-Saxon kingdoms in Britain are subjugated by which country?", options: ["+ Danes", "= Normans", "= Burgundians", "= Germans"] },
+            { q: "Who was the king of England in 871-900?", options: ["+ Alfred the Great", "= King Arthur", "= Wilhelm", "= King Canute"] },
+            { q: "When did Alfred the Great make peace with the Danes?", options: ["+ in 879", "= in 1066", "= in 870", "= in 840"] },
+            { q: "Which territories of the British Isles will be given to the Danes according to the peace treaty made by the King of England, Alfred the Great, with the Danes?", options: ["+ South", "= Central", "= Northeast", "= Southwest"] },
+            { q: "Between which cities the border between England and Denmark passed along the stone road built by the Romans?", options: ["+ London and Chester", "= Kent and Manchester", "= London and Kent", "= London and Manchester"] },
+            { q: "Who realizes that the Danes do not like to besiege castles, so they build many castles - burgs on the borders of their possessions?", options: ["+ Alfred the Great", "= King Arthur", "= King Canute", "= Wilhelm"] },
+            { q: "After whose lands in Wessex there were almost no Latin-speaking people left?", options: ["+ Denmark", "= Italy", "= France", "= Germany"] },
+            { q: "During who's period in England was the \"Anglo-Saxon Chronicle\" compiled, and important events were recorded in it every year?", options: ["+ Alfred the Great", "= William Alfred the Great", "= King Arthur", "= King Canute"] },
+            { q: "When did the Kingdom of England annex the Danish jurisdiction?", options: ["+ In the last quarter of the 10th century", "= in the ninth century", "= in the XI century", "= At the beginning of the 10th century"] },
+            { q: "Which city resisted the Danes for a while when the Kingdom of Denmark invaded England?", options: ["+ London", "= Chester", "= all answers are correct", "= Mercia"] },
+            { q: "When did the Hungarian invasion of Germany stop?", options: ["+955", "=919", "=950", "=962"] },
+            { q: "As a result, the church nobles in Germany were no less capable and powerful than the dukes and counts?", options: ["+ As a result of giving many rights and privileges to bishops and abbots, except for land and wealth", "=As a result of bishops being considered local representatives of the emperor, abbots of large monasteries", "= As a result of giving bishoprics the right to punish and replace local governors", "= As a result of the adoption of Christianity accelerating the transition to a new feudal society"] },
+            { q: "Who ruled the East Frankish kingdom from 843-919?", options: ["+Descendants of Charlemagne", "=Dynasty of Saxony", "=Staufen dynasty", "=Descendants of Otto I"] },
+            { q: "In what year did local nobles in the eastern Frankish kingdom elect Duke Henry of Saxony, the most powerful of the princes, to the throne?", options: ["+919", "=843", "=955", "=962"] },
+            { q: "When did the local Saxon dynasty come to power in the East Frankish kingdom instead of the Carolingian dynasty of the Franks?", options: ["+919", "=843", "=955", "=962"] },
+            { q: "In what year did a new country - the Kingdom of Germany - appear on the map of Europe?", options: ["+919", "=843", "=955", "=962"] },
+            { q: "What path did Henry I take when he became the king of the East Franks?", options: ["+Strengthening the country", "=Restoration of Charlemagne's empire", "=Foundation of the Holy Roman Empire", "= Carrying out raids"] },
+            { q: "For how many years Henry I made a truce with the Hungarians?", options: ["+ for 9 years", "= for 6 years", "= for 7 years", "= for 3 years"] },
+            { q: "Who ruled Germany from 936 to 973?", options: ["+Otto I", "=Henry I", "=John XII", "= Otto III"] },
+            { q: "During whose rule in Germany, a strong German cavalry was formed?", options: ["+Otto I", "=Henry I", "=John XII", "= Otto III"] },
+            { q: "What army formed the basis of the German cavalry in Germany?", options: ["+Heavily armed knights cavalry", "=Lightly armed cavalry", "=Heavily armed infantry", "=Infantry and cavalry"] },
+            { q: "With the support of the new cavalry, which relied on what, Otto I prepares for a decisive battle with the Hungarians?", options: ["+ To Burghs", "=To war weapons", "=To the feudal lords", "=To the villages"] },
+            { q: "In what year were the Hungarians defeated in a heavy battle on the banks of the Lech River in Bavaria?", options: ["+955", "=843", "=919", "=962"] },
+            { q: "What event made Otto I want to wear the imperial crown and title of emperor in Rome like Charlemagne?", options: ["+ Defeating the Hungarians", "=The collapse of Charlemagne's state", "=Enthronement of the Saxon dynasty in the East Frankish kingdom", "= The fall of the Western Roman Empire"] },
+            { q: "What event was supposed to convince everyone of the power of the new kingdom and that Otto I was the heir to the Roman and Charlemagne empires?", options: ["+Otto I was crowned emperor in Rome and received the title of emperor", "= Otto I's defeat of the Hungarians", "=Otto I overthrows the descendants of Charlemagne in the East Frankish kingdom", "=Foundation of the Kingdom of Germany by Otto I"] },
+            { q: "When will Pope John XII crown Otto I, who came to Rome with his army?", options: ["+962", "=954", "=963", "=999"] },
+            { q: "How many years after Otto I defeated the Hungarians, the Holy Roman Empire was established?", options: ["+After +7 years", "= after 17 years", "= after 19 years", "= after 12 years"] },
+            { q: "How wasl the new empire - the Holy Roman Empire be created?", options: ["+As a result of the imperial crowning of Otto I", "=As a result of the local Saxon dynasty coming to power in the East Frankish kingdom", "=As a result of the formation of the Kingdom of Germany", "= As a result of the emergence of a strong German cavalry"] },
+            { q: "Who was called a \"wonder of the world\" by his contemporaries?", options: ["+Otto III", "=John XII", "=Henry I ni", "=Henry II ni"] },
+            { q: "How did Otto I's struggle with the Hungarians end? 1. Otto I's victory over the Hungarians 2. To stop the Hungarian invasion of Germany 3. Crowning of Otto I in Rome and receiving the title of emperor 4. With the establishment of the Holy Roman Empire 5. It leads to the growth of a large land mass 6. He turned the lands belonging to the Roman emperor in Gaul into his property", options: ["+1,2,3,4", "=1,2,3,4,5,6", "=1,3,5", "=2,4,6"] },
+            { q: "Who did the people of Germany listen to more in the 10th century?", options: ["+ Of their dukes", "= His elders", "= His priests", "= Of their kings"] },
+            { q: "What kind of method did Otto I and his successors use in the management of the country? 1. They use church organizations for their own purposes 2. Bishops and abbots in Germany are given more rights and privileges in addition to land and wealth 3. And the emperor himself appointed the right person to the position of the church, and if necessary, he replaced the bishops and even the Roman popes without difficulty. 4. They start using the traditional customs of the Franks 5. People's meetings are not called 6. Each of the kingdoms was divided into duchies and counties, and they were divided into large and medium feudal estates.", options: ["+1,2,3", "=1,2,3,4,5,6", "=1,3,5", "=2,4,6"] },
+            { q: "On the place of the city of Constantinople is the colony of the Greek city of Byzantium.", options: ["+ Megara", "= Messana", "= Mycenae", "= Miletus"] },
+            { q: "Which regions were part of Byzantium?", options: ["+Balkan Peninsula, Asia Minor, Caucasus, Syria, Palestine, Egypt, Crete and Cyprus", "= Asia Minor and the southern part of the Balkan Peninsula", "=Balkan Peninsula, Greece, Asia Minor and Apennine Peninsula", "=Balkan Peninsula, Asia Minor, Iberian Peninsula"] },
+            { q: "How was the Byzantine Empire formed?", options: ["+As a result of the division of the Roman Empire into two independent states", "= As a result of the military campaigns of the Roman generals to Asia Minor", "= As a result of the Phoenicians founding their colonies", "=As a result of the Greeks founding the colony of Megara"] },
+            { q: "Note the aspects that show that Hellenism took a strong place in the life of Byzantium. 1. In the hippodromes, the people used to watch the competitions of riders, wrestlers, gymnasts, and mimes. 2. As before, residents of the city were treated by doctors who were paid by the administration 3. Residents of the city were going to the communal baths 4. Byzantium preserved the science of the ancient period 5. Although the residents were considered free people, they could not participate in the People's Council or serve in the army. 6. In their schools, children were trained in military work, they were raised to be strong and resilient", options: ["+1,2,3,4", "=1,3,5", "=2,4,6", "=1,2,3,4,5,6"] },
+            { q: "Note the aspects that show that Hellenism took a strong place in the life of Byzantium. 1. In the hippodromes, the people used to watch the competitions of riders, wrestlers, gymnasts, and mimes. 2. As before, residents of the city were treated by doctors who were paid by the administration 3. Residents of the city were going to the communal baths 4. Byzantium preserved the science of the ancient period 5. Although the residents were considered free people, they could not participate in the People's Council or serve in the army. 6. In their schools, children were trained in military work, they were raised to be strong and resilient", options: ["+1,2,3,4", "=1,3,5", "=2,4,6", "=1,2,3,4,5,6"] },
+            { q: "Which city was the capital of the Eastern Roman Empire?", options: ["+Constantinople", "=Alexandria", "= Antioch", "= Edessa"] },
+            { q: "In the Eastern Roman Empire, which language replaced Latin and became the official language?", options: ["+ Greek language", "= English language", "=Slavic language", "= French language"] },
+            { q: "What was the name of the people of the Eastern Roman Empire in Europe?", options: ["+ The Greeks", "=Slavs", "=Barbarians", "=Germans"] },
+            { q: "What did the citizens of the Eastern Roman Empire call themselves and their country?", options: ["+The Romans and the Roman Empire", "=Hellenes and Hellas", "=The Greeks and the Holy Roman Empire", "=The Germans and the New Roman Empire"] },
+            { q: "In the 6th century, which cities flourished as major trade and craft centers in the Eastern Roman Empire?", options: ["+Constantinople, Alexandria, Antioch, Edessa", "=Varna, Kosovo, Constantinople", "=Mansikert, Edessa and Tripoli", "= Konyo, Suvas, Kaisaria"] },
+            { q: "Which city will become the \"Golden Bridge\" connecting Asia and Europe?", options: ["+Constantinople", "= Edessa", "=Alexandria", "= Antioch"] },
+            { q: "Which Byzantine gold coin was considered the most reliable international currency?", options: ["+ Numisma", "= Dirham", "= Dinar", "= Zlata"] },
+            { q: "Who ruled the Byzantine Empire?", options: ["+ Vasilevs", "=King", "= Synclite", "= Markgraf"] },
+            { q: "Identify the Greek word for \"king\".", options: ["+ Vasilevs", "=King", "= Synclite", "= Markgraf"] },
+            { q: "Identify the Latin word for senate, which became the advisory body of the emperor in Byzantium.", options: ["+ Synclite", "=Congress", "=Parliament", "= Come on"] },
+            { q: "Who were the officials and senators in Byzantium?", options: ["+Nobles, talented and educated children of ordinary people", "=From the highest representatives of the nobility", "= From military leaders, high representatives of the nobility", "=One of the richest and most prestigious people"] },
+            { q: "Who were the Mims?", options: ["+ Actors", "=Workers on feudal land", "= Secondary schools", "=High representative of the nobility"] },
+            { q: "Most of the primary and secondary schools in Byzantium...", options: ["+Private or state-owned", "= It was next to the temple and monasteries", "=Emperor and established cities", "= Belonged to the Pope and bishops"] },
+            { q: "The Byzantine Empire reached the peak of its power during the period of whose empire?", options: ["+Justinian I", "= Justin", "= Feodesius", "=Constantine I"] },
+            { q: "Who ruled the Byzantine Empire from 527 to 565?", options: ["+Justinian I", "= Justin", "= Feodesius", "=Constantine I"] },
+            { q: "In what family was Justinian I born?", options: ["+A poor farmer", "= Nobleman", "= Military leader", "=Feudal"] },
+            { q: "Justinian I's uncle Justin...", options: ["+Raises from an ordinary soldier to the rank of general and occupies the imperial throne", "He had political wisdom and courage", "=Reforms much of the life of the Empire through reforms", "=Being a military commander, he subdues a large part of Italy"] },
+            { q: "Who was Justinian's wife Princess Theodora in her youth?", options: ["+Actress", "= Wizard", "= Merchant", "=Vestal"] },
+            { q: "Byzantium's golden age coincides with who?", options: ["+Justinian I", "= Justin", "= Feodesius", "=Constantine I"] },
+            { q: "In what year did Justinian I send the general Belisarius against the Vandals who settled in North Africa, established a state, and plundered merchant ships in the Mediterranean?", options: ["+ in the year 534", "= in the year 566", "= in the year 536", "= in the year 539"] },
+            { q: "Where did Velisari go after subduing the Vandals?", options: ["+To Italy", "=To Spain", "=To Asia Minor", "= to Egypt"] },
+            { q: "Where did the Byzantines conquer without difficulty?", options: ["+The island of Sicily", "=The island of Cyprus", "=The island of Corsica", "= the island of Sardinia"] },
+            { q: "Who are the Byzantines in Italy strongly opposed?", options: ["+ Of the Ostrogoths", "=of the Visigoths", "=Vandals", "=of the Lombards"] },
+            { q: "Who freed fugitive slaves and used them against Belisarius?", options: ["+ Ostgoths", "= Lombards", "=Vandals", "=Vestgotlar"] },
+            { q: "Where did the Byzantines establish a separate viceroyalty with Ravenna as its capital?", options: ["+In Italy", "=In North Africa", "=In Gaul", "=In the Iberian Peninsula"] },
+            { q: "Where did Justinian I occupy where the Visigoths ruled?", options: ["+Spain", "=North Africa", "= Italy", "=The islands of Crete and Cyprus"] },
+            { q: "Whose army did Byzantium conquer the southern provinces and establish control over the Strait of Gibraltar?", options: ["+Visigoths", "= Lombards", "=Vandals", "=Ostgoths"] },
+            { q: "Where are the conquests under Justinian I?", options: ["+North Africa, Italy and Spain", "= Asia Minor and the Caucasus", "=Syria, Palestine and Egypt", "=The islands of Crete and Cyprus"] },
+            { q: "Which Germanic tribes were subjugated during the reign of Justinian I?", options: ["+Vandals, Ostrogoths and Visigoths", "=Turing, Alemannic and Bavarian", "=Vandals, Burgundians and Lombards", "=Franks, Visigoths and Ostrogoths"] },
+            { q: "As a result of the weakening of Byzantium, whose conquests did open the way?", options: ["+Slavic tribes and Arab caliphate", "=Germanic tribes and Ottoman Turks", "=Hun tribes and Seljuks", "=Jews and Arabs"] },
+            { q: "Which tribes began to invade Byzantium from the middle of the 6th century?", options: ["+Slavic tribes", "=Germanic tribes", "=Hunn tribes", "=Turkic tribes"] },
+            { q: "As a result of the attacks of the Arab caliphate, in what century did Syria and Egypt fall from Byzantium?", options: ["+ in the 7th century", "= in the middle of the 6th century", "=at the beginning of the 5th century", "=early 8th century"] },
+            { q: "In which centuries did the free peasants become impoverished, dependent, and what kind of categories emerged in Byzantine agriculture?", options: ["+Feudals and landless peasants", "=Freemen and semi-freemen", "=Slaves and slaves", "=Feudals are semi-free people"] },
+            { q: "In which centuries did the emperors give a lot of land and property to officials, temples, and monasteries?", options: ["+X-XI centuries", "=IX-XIV centuries", "= the end of the VIIIth century - the middle of the XIth century", "=X-XVI centuries"] },
+            { q: "In what centuries was feudal society formed in Byzantium?", options: ["+X-XI centuries", "=IX-XI centuries", "= the end of the VIIIth century - the middle of the XIth century", "=X-XVII centuries"] },
+            { q: "What factor leads to the intermittent establishment of feudal relations in Byzantium?", options: ["+The strengthening of feudal power and the weakening of the central government", "= The emperors gave a lot of land and property to officials, temples, and monasteries", "=Free peasants become impoverished and dependent", "= The process of property stratification in the village intensified, the emergence of the categories of large landowners - feudal lords and landless peasants"] },
+            { q: "What nations did the Western Slavs belong to?", options: ["+ Czechs, Poles and Slovaks", "= Bulgarians, Serbs, Croats, Slovenes, Montenegrins, Macedonians and Bosnians", "=Czechs, Serbs, Slovenes, Russians", "= Russians, Ukrainians, Belarusians"] },
+            { q: "What nations did the South Slavs belong to?", options: ["+ Bulgarians, Serbs, Croats, Slovenes, Montenegrins, Macedonians and Bosnians", "= Czechs, Poles and Slovaks", "=Czechs, Serbs, Slovenes, Russians", "= Russians, Ukrainians, Belarusians"] },
+            { q: "Leaders of the Slavs - horsemen not only defended their territories...", options: ["+They also organized marches to neighboring countries", "= also protected neighboring areas", "= they were also engaged in farming", "= they fought each other"] },
+            { q: "Which of the following were the main tasks of Oleg and subsequent princes? 1) Freedom from the tyranny of the Khazar Khanate 2) Defeat the Bijanaks in battle 3) continue to unify the eastern Slavic tribes 4) Conquest of Byzantine territory 5) protection of state borders from external enemies 6) Establish beneficial trade relations with Byzantium", options: ["+ 1,3,5,6", "= 1,2,4", "=1,4,5", "=2,3,4"] },
+            { q: "With which country will Oleg make a beneficial agreement? According to it, Russian merchants are allowed to trade in the country without duty.", options: ["+ Byzantium", "= Germany", "= Arab caliphate", "= Poland"] },
+            { q: "Why was the Saint Sophia Cathedral built in Kiev?", options: ["+ in honor of the victory over the Bijanak tribes", "= in honor of the victory over the Drevlyan tribes", "= in honor of the victory over the Arabs", "= in honor of the victory over the Byzantines"] },
+            { q: "The schools introduced by Charlemagne were opened under ...", options: ["+ temple", "= special schools", "= houses of officials", "= observatory"] },
+            { q: "Find a building with mosaics and frescoes that is considered one of the great architectural monuments of its time?", options: ["+ Hori Monastery (now the Qahriya Mosque in Istanbul)", "= Church of Saint Sophia", "= Church of Speyer in Germany", "= Church in Aachen"] },
+            { q: "Identify structures in France built in the Romanesque style.", options: ["+ Arles, Cluny, Poit", "= Worms, Speyer, Aachen, Arl", "= Cluny, Aachen, Mainz", "= Worms, Aachen, Mainz, Speyer"] },
+            { q: "How long have books been kept in monastery libraries?", options: ["+ until the XIIth century", "= until the XXth century", "= books are not kept in monasteries", "= to the Xth century"] },
+            { q: "Identify the cities in the history of the state of Kievan Rus, where the compilation of chronicles began.", options: ["+ Kiev and Novgorod", "= Novgorod and Pskov", "= Polosk and Minsk", "= Vladimir and Suzdal"] },
+            { q: "Which of the following works is related to the period of Yaroslav.", options: ["+ The education system in Russia has improved;", "= built new defense structures in the border areas;", "= established a training school for Christian priests in Kiev;", "= converted Russians to Christianity;"] },
+            { q: "What is parchment?", options: ["+ specially treated leather", "= workshop where monk calligraphers work", "= decorating the book cover with precious stones and metal", "= to translate a religious work into one's own language"] },
+            { q: "During the period of which ruler was built the temple of St. Sophia?", options: ["+ In Kiev during the time of Yaroslavl, and in Constantinople during the time of Justinian I", "= in Kiev during the time of Yaroslavl and in Aachen during the time of Charlemagne", "= in Rome under Otto III and in Constantinople under Justinian I", "= in Rome during the reign of Otto III and in Aachen during the reign of Charlemagne"] },
+            { q: "In primary schools attached to synagogues and monasteries ... are prepared?", options: ["+ lower-ranking priests", "= priests of family rank", "= church servants", "= book copying errors"] },
+            { q: "What is astrology?", options: ["+ those who tried to tell the fate of people by looking at the planets and stars", "= taught to write poetry, artistic works, public speaking, fundamentals of law.", "= A workshop where monks work in large monasteries", "= the science of linguistics, taught my child to read."] },
+            { q: "Where did the people of Kievan Rus accept the Orthodox sect of Christianity?", options: ["+ From Byzantium", "= from France", "= from Germany", "= from Rome"] },
+            { q: "The factor that motivated the creation of the Slavic script ...", options: ["+ The introduction of a new religion increased the need for religious books", "= widespread promotion of Christianity among the Western Slavs", "= The creation of the Slavic script based on the Greek alphabet in the middle of the 9th century by the monk scholars - Cyril and Methodius", "= The spread of this writing to the Russian lands in Bulgaria."] },
+            { q: "Determine the main occupation of the population living in the southern and western parts of the Arabian Peninsula.", options: ["+ farming", "= animal husbandry", "= craftsmanship", "= trade"] },
+            { q: "What did nomadic Arabs and Bedouins do?", options: ["+ with camel breeding, sheep breeding and goat breeding", "= animal husbandry and agriculture", "= with crafts and trade", "= with cattle, sheep and goat breeding"] },
+            { q: "Identify the most developed regions of the Arabian Peninsula in the Middle Ages.", options: ["+ Hijaz and Yemen", "= Syria and Iraq", "= Mecca and Yathrib", "= Iraq and Medina"] },
+            { q: "Identify the city called \"Arabia felix\" - that is, \"happy Arabia\" by Roman historians.", options: ["+ Yemen", "= Iraq", "= Sudan", "= Yasrib"] },
+            { q: "Identify the factor that accelerated the crisis of the seed society in Arabia at the beginning of the VIIth century.", options: ["+ spoils obtained in wars;", "= opening of new agricultural oases;", "= population increase;", "= transition to equal use of land and water;"] },
+            { q: "Prophet Muhammad s.a.v. Find the correct answer that names the fathers of.", options: ["+ Abdullah", "= Abu Mutallib", "= Abu Bakr", "= Abu Talib"] },
+            { q: "What name was the city of Madinah originally called?", options: ["+ Yasrib", "= Konyo", "= Fustos", "= Sufyan"] },
+            { q: "In what year was the religion \"Islam\" adopted by the majority of the inhabitants of the Arabian Peninsula?", options: ["+ 610 year", "= 622 year", "= 632 year", "= 630 year"] },
+            { q: "One of the most important deities is the god of war and fertility.", options: ["+ Primer \"Morning Star\"", "= Lat", "= Syn", "= Shamash"] },
+            { q: "How many surahs does the Holy Qur'an consist of?", options: ["+ from 114 suras", "= from 112 suras", "= from 116 surahs", "= from 124 surahs"] },
+            { q: "What people were the Arabs?", options: ["+ Sami", "= khonsi", "= peleshet", "= Iroquois"] },
+            { q: "Which peoples besides the Arabs were part of the Sami? 1) Jews; 2) Guptas; 3) Assyrians; 4) Phoenicians; 5) Arabs; 6) Arameans;", options: ["+ 1,3,4,6", "= 2,3,4,5", "= 1,3,4,5", "= 2,3,4,6"] },
+            { q: "What did the people of the south and west of Arabia do?", options: ["+ settled farmers built palm groves and vineyards on the banks of rivers and streams and wells", "= people who lived on the banks of rivers and streams with sedentary agriculture", "= Bedouins lived in deserts and pastures and moved", "= engaged in serving merchants and tourists on caravan routes."] },
+            { q: "Which regions were included in the Arab caliphate during Caliph Osman's time?", options: ["+ He conquered Dagestan and went to the shores of Amudarya", "= Khurasan was occupied, it entered the territories of Central Asia", "= Iran was completely occupied, the southern parts of Khorasan were occupied", "=North Africa was completely subjugated"] },
+            { q: "Which book masterpieces were widely used in the interior and exterior decoration of buildings in the architecture of the Arab caliphate?", options: ["+ From the verses of the book \"Holy Qur'an\".", "= From all samples of works left by scholars", "= From the works of Hadith scholars", "= From the works created by the Caliphs"] },
+            { q: "What motivated the unification of China in the second half of the 6th century.", options: ["+ The threat of attack by the Turkish khanate", "= Danger of invasion by nomadic Hun tribes", "= Economic and cultural development", "= Risk of complete disappearance of statehood"] },
+            { q: "In China, every household was obliged to plant a fruit tree in its garden.", options: ["+ mulberry cultivation", "= paying taxes", "= silkworm feeding", "= planting rice"] },
+            { q: "The rise of which cities in the VIIth century was connected with the development of trade and crafts.", options: ["+ Hangzhou, Kaifin, Hangzhou", "= Gaochan, Hanson, Kaifin", "= Pyongyang, Yangzhou, Beijing", "= Hangzhou, Gaochan, Pyongyang"] },
+            { q: "The ancient Han slave empire is in crisis, and what independent states will emerge in its place?", options: ["+ Wei, Shu, U", "= Sui, Tan, Sun", "= Yuan, Min, Chu", "= Shan, Zhou, Sin"] },
+            { q: "What is the impetus for the unification of China in the second half of the VIth century?", options: ["+ The danger of the invasion of the Turkish khanate", "= Danger of Japanese invasion of China", "= People's uprisings", "= Natural disasters"] },
+            { q: "The era of the Sui dynasty in China?", options: ["+ 589-618 years", "= 618-907 years", "= 907-960s", "= 960-1279 years"] },
+            { q: "The Grand Canal in China connects which rivers?", options: ["+ Huanghe and Yanzi", "= Tiber and Po", "= Indus and Ganga", "= Euphrates and Tigris"] },
+            { q: "Who founded the rule of the Tang Dynasty in China?", options: ["+ Lee Yuan", "= Zhu Yuan-Zhang", "= Zhang He", "= Xuan Xiang"] },
+            { q: "Xitoyda ayrim a’yonlarning mavqelari: unvon va lavozimlariga qarab qancha mugacha yer bilan ta’minlanganlar?", options: ["+ 500 dan 10 ming mugacha", "= 300 dan 6 ming mugacha", "= 400 dan 8 ming mugacha", "= 100 dan 4 ming mugacha"] },
+            { q: "How much land was given to a military or official in China for special services?", options: ["+ from 300 to 6 thousand mu", "= 100 to 4 thousand mu", "= 400 to 8 thousand mu", "= 600 to 10 thousand mu"] },
+            { q: "Which cities were built in China along the Grand Canal and the coasts of the sea from the 7th century?", options: ["+ Hangzhou, Kaifin, Hangzhou", "= Chanyang, Luoyang, Ningbo", "= Beijing, Xi'an, Nanjing", "= Guangzhou, Shanghai, Hong Kong"] },
+            { q: "During the reign of the Tang Dynasty, China waged major wars against which country?", options: ["+ Turkish khanate", "= Gaochan", "= Korea", "= Japan"] },
+            { q: "What countries did China trade with during the Sun Dynasty?", options: ["+ Central Asia, India, Indochina", "= Arab Caliphate, Byzantium, Kievan Rus", "= Korea, Bulgaria, France", "= Golden Horde, Iran, Germany"] },
+            { q: "What was gunpowder originally used for?", options: ["+ In athletics", "= In the chapel", "= In the cannon", "= In agriculture"] },
+            { q: "From what period did production develop in Europe in the Middle Ages?", options: ["+ X-XI century", "= IX-X centuries", "= XI-XII century", "= XII-XIII century"] },
+            { q: "In what area did the development in manufacturing that began in Europe first begin?", options: ["+ crafts", "= animal husbandry", "= in farming", "= fishing"] },
+            { q: "In the history of the world, the developed period of the Middle Ages corresponds to how many centuries?", options: ["+ XI-XV centuries", "= IX-XIV centuries", "= X-XII century", "= X-XIV century"] },
+            { q: "Why was the freedom of craftsman limited in the villages in the Middle Ages?", options: ["+ feudal rule", "= influence of cities", "= agricultural development", "= poor quality of goods"] },
+            { q: "Why were craftsmen forced to flee the villages in the Middle Ages?", options: ["+ lack of freedom for the craftsman", "= influence of cities", "= agricultural development", "= feudal rule"] },
+            { q: "When did cities such as Venice, Genoa, Florence, Marseille, Toulouse in the south of Italy and France begin to rise?", options: ["+ IX-X century", "= X-XII century", "= XI-XV century", "= X-XIV century"] },
+            { q: "In the territory of which of the following countries, new cities were created in the XII-XIII centuries? 1. England, 2. Russian lands, 3. Netherlands, 4. Germany, 5. Hungary, 6. Northern France, 7. Baltic region", options: ["+ 2,5,7", "= 2,4,6", "= 1,3,4,6", "= 1,2,3,6"] },
+            { q: "What was the main reason for the emergence of European cities in different centuries?", options: ["+ difference in socio-economic development", "= due to the process of urbanization", "= changes in craftsmanship", "= due to the location of cities"] },
+            { q: "What was the city council building called in Europe in the Middle Ages?", options: ["+ ratusha", "= parliament", "= agora", "= dividend"] },
+            { q: "What language does the word Sekh come from?", options: ["+ German", "= Russian", "= French", "= Greek"] },
+            { q: "In which cities did the uprisings of the poor take place in the XIVth-XVth centuries?", options: ["+ Florence, Perugia, Siena, Cologne;", "= Paris, Bristol, Perugia, Basle;", "= London, Bristol, Paris, Basle;", "= Paris, London, Siena, Basel;"] },
+            { q: "What was the difference between natural economy and commodity economy?", options: ["+ with sale and exchange", "= with quality", "= with neatness and compactness", "= with selling price"] },
+            { q: "In Western Europe in the XIIIth-XVth centuries, the Levant trade route connected which countries by sea with Byzantium and Asian countries?", options: ["+ Spain, Italy, Southern France", "= England, Spain, Italy", "= England, Italy, France", "= Italy, France, Germany"] },
+            { q: "In the Middle Ages, which cities were connected by the Northern trade route through the Baltic Sea?", options: ["+ London, Bruges, Lübeck, Novgorod", "= Paris, London, Florence", "= Paris, Novgorod, Lübeck, Bruges", "= Paris, Florence, Novgorod, Lübeck"] },
+            { q: "Which cities were located on the Levantine trade route and formed a powerful navy?", options: ["+ Venice and Genoa", "= Florence and Paris", "= Paris and London", "= London and Florence"] },
+            { q: "What is a factory?", options: ["+ commercial locations", "= battlefield", "= city council", "= city center"] },
+            { q: "Most of those who created the factory system were merchants of which city?", options: ["+ Genoa and Venice", "= Paris and London", "= Florence and Paris", "= London and Paris"] },
+            { q: "The most famous fair of medieval Europe was located in the territory of which country was the Champagne region?", options: ["+ In the north-east of France", "= East of England", "= in southern Italy", "= in the north-west of Italy"] },
+            { q: "What was the name of the place where merchants exchanged money?", options: ["+ Exchange", "= Bank", "= Market", "= fair"] },
+            { q: "Since when, the Roman Catholic and Greek Orthodox churches have been operating independently", options: ["+From the middle of the XIth century", "=From the middle of the XVth century", "=From the middle of the XIVth century", "= from the middle of the XVIth century"] },
+            { q: "What is an indulgence?", options: ["+ Tab of forgiveness of sins", "= Birth certificate", "= Marriage certificate", "=Death certificate"] },
+            { q: "What is the meaning of the word indulgence.", options: ["+Latin-apology", "=Latin-search", "=Portuguese-religion work", "=Greek-Dahrians"] },
+            { q: "What is an interdict?", options: ["+Temporary prohibition of prayers and ceremonies in the country", "= Tab of forgiveness of sins", "= Birth certificate", "= Marriage certificate"] },
+            { q: "What did some monks do in their free time from prayer.", options: ["+Taught children in schools near the monastery", "=Calligraphy", "=Farming", "=Crafted"] },
+            { q: "What is the name of people who oppose the Church and its teachings.", options: ["+ dahris", "= Rebels", "= campaigners", "= persecutions"] },
+            { q: "What is the meaning of the word heretic.", options: ["+Greek-Dahrians", "=Latin-search", "=Portuguese-religion work", "=Latin-apology"] },
+            { q: "What is the meaning of the word inquisition.", options: ["+Latin-search", "=Portuguese-religion work", "=Greek-Dahrians", "=Latin-apology"] },
+            { q: "What is the meaning of the word autodefe.", options: ["+Portuguese-religion work", "=Latin-search", "=Greek-Dahrians", "=Latin-apology"] },
+            { q: "That is, where should the Christian states to be established in the Near East be politically dependent?", options: ["+ To Byzantium", "= to Jerusalem", "= to Egypt", "= to France"] },
+            { q: "What was the main reason for the cessation of the Crusades?", options: ["+ The changes that began in Western European countries at the end of the 13th century", "= knights began to serve the king", "= merchants preferred to trade peacefully", "= cutting down forests and turning them into fields"] },
+            { q: "Determine the years of life of King Philip IV of France.", options: ["+ 1285–1314", "= 1394–1403", "= 1309–1377", "= 1369–1410"] },
+            { q: "Identify the king who ruled France from 1285–1314.", options: ["+Philip IV", "= Louis VI", "= Louis IX", "= Philip VIII"] },
+            { q: "Which king annexed the county of Champagne, the city and province of Lyon to his royal domain?", options: ["+Philip IV", "= Philip VIII", "= Louis IX", "= Louis VI"] },
+            { q: "Philip IV (1285–1314), who continued to centralize France, annexed what lands to the royal domain at the beginning of his reign?", options: ["+ County of Champagne, city and region of Lyon", "= Bourges and Sans, Aquitaine", "= Toulouse and Normandy", "= Toulouse and Aquitaine"] },
+            { q: "What is the region that united the large commercial and industrial cities in the north of France?", options: ["+ Flanders", "= Toulouse", "= Normandy", "= Champagne"] },
+            { q: "During the centralization of France, after adding the county of Champagne, the city of Lyon and the province to the royal domain, where will Philip IV's next actions be focused on occupying?", options: ["+ Flanders", "= Normandy", "= Toulouse", "= Aquitaine"] },
+            { q: "Which king of Europe was the first to demand taxes from the church, which owned large estates?", options: ["+Philip IV", "= Philip VIII", "= Louis IX", "= Louis VI"] },
+            { q: "What period is 1294–1303?", options: ["+ Years of Pope Boniface VIII", "= Reign years of King Philip II of France", "= Years of the Avinon Captivity of the Popes", "= Reign years of King Philip IV of France"] },
+            { q: "What did Pope Boniface VIII demand of Philip IV, besides forbidding the clergy to pay taxes to the King of France?", options: ["+ to stop the war against Flanders", "= Philip IV's excommunication from the Church", "= The King's submission to the will of the Pope", "= Not to interfere in papal affairs"] },
+            { q: "What did Pope Boniface VIII forbid priests?", options: ["+ To pay taxes to the king of France", "= to participate in the war against Flanders with Philip IV", "= To participate in the States General", "= to give troops to Philip IV"] },
+            { q: "Why did Boniface VIII prepare to solemnly announce the excommunication of Philip IV?", options: ["+ In response to the King of France's disobedience to the will of the Pope", "= Philip IV for not stopping the war against Flanders", "= The King of France for keeping the Popes in captivity", "= Philip IV for demanding taxes from the Pope"] },
+            { q: "In 1302, the king of France summoned representatives of the three classes and invited them to discuss the conflict with the pope. Identify representatives of the three categories.", options: ["+ priests, nobles and townspeople", "= large feudal lords, nobles, military", "= nobles, townspeople, military", "= nobles, townspeople, merchants"] },
+            { q: "Who first called the States General in France?", options: ["+Philip IV", "= Philip VII", "= Louis IX", "= Louis VI"] },
+            { q: "When was the States General called for the first time in France?", options: ["+ 1302 year", "= 1308 year", "= 1294 year", "= 1309 year"] },
+            { q: "What are the States General?", options: ["+ The highest class-representative institution in France", "= Parliament in France", "= A privileged part of the feudal class in France", "= Organization formed in France to centralize the country"] },
+            { q: "Which term means \"gross categories\"?", options: ["+ States General", "= Founding meeting", "= Parliament", "= National assembly"] },
+            { q: "Relying on whom, Philip IV launched a campaign against the Pope and won a complete victory?", options: ["+ To the general public", "= into three categories", "= to a strong army", "= to the States General"] },
+            { q: "Who was elected Pope after Boniface VIII?", options: ["+ Archbishop of France", "= Cardinal of France", "= Bishop of France", "= Boniface IX"] },
+            { q: "How many years in the history of the Roman Church was called the \"prisoner of the popes of Avinon\"?", options: ["+ 1309-1377 years", "= 1261-1394 years", "= 1287-1293 years", "= 1202-1214 years"] },
+            { q: "How many years did it take for the Pope to return to Rome?", options: ["+ 70 years", "= 60 years", "= 20 years", "= 80 years"] },
+            { q: "During the reign of Philip IV, the papal residence moved to which city?", options: ["+ Avinon", "= Paris", "= Marcel", "= Anani"] },
+            { q: "What was the name of the years 1309-1377 in the history of the Roman Church?", options: ["+ Avinon Prisoner of the Popes", "= Templar work", "= French prisoner of the Popes", "= Torture of the Templars"] },
+            { q: "When was the \"grand master\" of the Templar order be sentenced to death?", options: ["+ in 1314", "= in 1293", "= in 1313", "= in 1291"] },
+            { q: "From what period did the Class Monarchy begin to form in France?", options: ["+ From the XIV century", "= from the XVth century", "= from the 16th century", "= from the XVIIth century"] },
+            { q: "Which king of France started the Templars?", options: ["+ Philip IV", "= Charles VI", "= Louis IX", "= Ludovic V"] },
+            { q: "When was most members of the Templar Order and the \"Grand Master\" imprisoned?", options: ["+ in 1307", "= in 1293", "= in 1214", "= in 1291"] },
+            { q: "From whom did Philip IV confiscate the property of the Templars?", options: ["+ From the Pope of Avinon", "= from the general public", "= from gross categories", "= from the Pope"] },
+            { q: "What countries did the Hundred Years War take place?", options: ["+ England and France", "= England and Denmark", "= Germany and England", "= France and Germany"] },
+            { q: "When did the Hundred Years War take place?", options: ["+ in the years 1337-1453,", "= in the years 1337-1437,", "= in the years 1330-1446,", "= in the years 1337-1447"] },
+            { q: "What was the reason for the Hundred Years War?", options: ["+ The question of who to put on the throne of France", "= The question of who to put on the throne of England", "= Dispute of colonial territories between two countries", "= Competition of trade routes between two countries"] },
+            { q: "Who was the king of England at the beginning of the Hundred Years' War?", options: ["+ Edward III", "= Philip IV", "= Edward II", "= Philip"] },
+            { q: "Which family is recognized as the successor of the Capetians in France?", options: ["+ Values", "= The Habsburgs", "= Merovingians", "= Carolingians"] },
+            { q: "In which year did the king of France announce that the British recognized the region of Aquitaine in the southwest of the country?", options: ["+ 1337", "= 1333", "= 1332", "= 1335"] },
+            { q: "What kind of war will the war between England and France in 1337-1453 soon turn into?", options: ["+ to the pan-European conflict", "= to the Hundred Years War", "= to world war", "= to an international conflict"] },
+            { q: "What happened in 1340 during the Hundred Years War?", options: ["+ the British defeat the French navy and attack on land", "= The war between England and France becomes a pan-European conflict", "= The French king announces that the English have taken possession of the lands of Aquitaine in the south of the country", "= the first major battle will be near Crecy"] },
+            { q: "When did the British defeat the French navy and attack on land?", options: ["+ in 1340", "= in 1450", "= in 1414", "= in 1361"] },
+            { q: "When was the first major battle between France and England in the 100 Years War?", options: ["+ in 1346", "= in 1349", "= in 1450", "= in 1369"] },
+            { q: "The first major battle between France and England?", options: ["+ Battle of Crecy", "=Battle of Bove", "= Battle of Calais", "= Battle of Poite"] },
+            { q: "In what year did the first major battle take place near Crecy and the French army was defeated?", options: ["+ 1346", "= 1335", "= 1337", "= 1333"] },
+            { q: "What happened in 1346 during the Hundred Years War?", options: ["+ the first major battle was near Crecy", "= The war between England and France becomes a pan-European conflict", "= the British defeated the French navy and attack on land", "= The French king announced that the English have taken possession of the lands of Aquitaine in the south of the country"] },
+            { q: "During the Hundred Years' War, when did an army twice as large as France pursue the forces of Prince Edward of England and catch up with him near Poitou?", options: ["+ 1356,", "= 1346,", "= 1340.", "= 1366"] },
+            { q: "In 1356, King Edward of England refused to surrender with his small army, but had no choice but to fight, as a result..", options: ["+ King of France John the Magnificent and his son Philip were captured;", "= English prince Edward was defeated in battle and captured;", "= Jakeria rebellion began", "= The Wat Tyler Rebellion began."] },
+            { q: "In 1356, despite the double number of French troops, why did the English capture the king and his prince?", options: ["+ King John the Magnificent and Prince Philip willingly sided with the British;", "= Jakeriya rebellion began, and part of the army was sent there", "= During the battle, the disjointed action of the French caused the death of all the knights;", "= Due to the lack of knights in the French army."] },
+            { q: "During the Hundred Years' War, which French king was captured at the Battle of Poitou?", options: ["+ John the Generous", "= Edward III.", "= Philip", "= Karl V"] },
+            { q: "When did the Zakeria uprising take place?", options: ["+ In May 1358", "= In March 1356", "= In March 1348", "= in May 1337"] },
+            { q: "Why was the revolt in France called \"Jaqueria\" in 1358?", options: ["+ The nickname Jacques was used for an ordinary farmer;", "= The nickname of the leader of the uprising was Jacques", "= Taken from the name of the region where the rebellion started;", "= The word Jak means rebellion."] },
+            { q: "The period when the Delhi Sultanate of Muslims existed?", options: ["+ 1206-1526 years", "= 1207-1208 years", "= 1230-1276 years", "= 1234-1254 years"] },
+            { q: "The first ruler of the Delhi Sultanate?", options: ["+ Qutbiddin Aybak", "= Tugluk Timur", "= Feruzshah", "= Sultanbek"] },
+            { q: "The army of Delhi Sultan Qutbuddin Aibak consisted of… ?", options: ["+ Turkic tribal horsemen", "= Persian tribal cavalry", "= Arab tribal horsemen", "= horsemen of the Mughal tribe"] },
+            { q: "When was Muslim rule firmly established in all parts of the Delhi Sultanate?", options: ["+ in the XII-XIII centuries", "= X-XI centuries", "= XIII-XIV centuries", "= in the XI-XV centuries"] }
+        ];
+
+        // ----- helper: shuffle array in place (Fisher–Yates) -----
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // ----- build question objects with shuffled options, keep correct value -----
+        function buildShuffledQuestions() {
+            return rawQuestions.map((item, idx) => {
+                // extract correct answer (remove leading "+")
+                const correctRaw = item.options.find(opt => opt.startsWith('+'));
+                const correctValue = correctRaw ? correctRaw.substring(1).trim() : '';
+
+                // build option objects: { label, isCorrect }
+                const optionObjs = item.options.map(opt => {
+                    const isCorrect = opt.startsWith('+');
+                    const label = opt.substring(1).trim();
+                    return { label, isCorrect };
+                });
+
+                // shuffle
+                const shuffled = shuffleArray([...optionObjs]);
+
+                return {
+                    id: idx,
+                    question: item.q,
+                    options: shuffled,
+                    correctValue: correctValue
+                };
+            });
+        }
+
+        // ----- state -----
+        let questions = buildShuffledQuestions();
+        let totalQuestions = questions.length;
+
+        // ----- render function -----
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let html = '';
+
+            questions.forEach((q, index) => {
+                const qNum = index + 1;
+                html += `<div class="question-card" data-qid="${q.id}">`;
+                html += `<div class="q-text"><span class="q-number">${qNum}.</span> ${q.question}</div>`;
+                html += `<div class="options">`;
+
+                q.options.forEach((opt, optIdx) => {
+                    const optionId = `q${q.id}_opt${optIdx}`;
+                    html += `<div class="option">`;
+                    html += `<input type="radio" name="q${q.id}" id="${optionId}" value="${opt.label}" data-correct="${opt.isCorrect}">`;
+                    html += `<label for="${optionId}">${opt.label}</label>`;
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+                // we don't show correct badge by default, will show on check
+                html += `<div class="answer-hint" id="hint-${q.id}" style="display:none;">✔ Correct: ${q.correctValue}</div>`;
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+            updateScore(); // reset score display
+        }
+
+        // ----- update score display -----
+        function updateScore() {
+            const allRadios = document.querySelectorAll('input[type="radio"]:checked');
+            let correct = 0;
+            let total = 0;
+            // we count only questions that have at least one checked radio
+            const questionIds = new Set();
+            allRadios.forEach(radio => {
+                const name = radio.name; // q{id}
+                questionIds.add(name);
+                if (radio.dataset.correct === 'true') {
+                    correct++;
+                }
+            });
+            // total = number of questions that have at least one checked radio
+            total = questionIds.size;
+            document.getElementById('scoreDisplay').textContent = `${correct} / ${total}`;
+        }
+
+        // ----- check answers: show correct/incorrect, reveal hints, mark correct -----
+        function checkAnswers() {
+            // clear previous marks
+            document.querySelectorAll('.option.correct-answer, .option.wrong-answer').forEach(el => {
+                el.classList.remove('correct-answer', 'wrong-answer');
+            });
+
+            let correctCount = 0;
+            let answeredCount = 0;
+
+            questions.forEach(q => {
+                const questionDiv = document.querySelector(`.question-card[data-qid="${q.id}"]`);
+                if (!questionDiv) return;
+
+                const selectedRadio = questionDiv.querySelector(`input[name="q${q.id}"]:checked`);
+                const hint = document.getElementById(`hint-${q.id}`);
+
+                // show hint always when checking
+                if (hint) hint.style.display = 'inline-block';
+
+                if (selectedRadio) {
+                    answeredCount++;
+                    const parentOption = selectedRadio.closest('.option');
+                    const isCorrect = selectedRadio.dataset.correct === 'true';
+                    if (isCorrect) {
+                        correctCount++;
+                        if (parentOption) parentOption.classList.add('correct-answer');
+                    } else {
+                        if (parentOption) parentOption.classList.add('wrong-answer');
+                        // also highlight the correct option (green border)
+                        const allOptions = questionDiv.querySelectorAll('.option');
+                        allOptions.forEach(opt => {
+                            const radio = opt.querySelector('input[type="radio"]');
+                            if (radio && radio.dataset.correct === 'true') {
+                                opt.classList.add('correct-answer');
+                            }
+                        });
+                    }
+                } else {
+                    // if not answered, just show correct answer (green border) and hint
+                    const allOptions = questionDiv.querySelectorAll('.option');
+                    allOptions.forEach(opt => {
+                        const radio = opt.querySelector('input[type="radio"]');
+                        if (radio && radio.dataset.correct === 'true') {
+                            opt.classList.add('correct-answer');
+                        }
+                    });
+                }
+            });
+
+            // update score
+            document.getElementById('scoreDisplay').textContent = `${correctCount} / ${answeredCount}`;
+        }
+
+        // ----- reset: reshuffle all options, clear selections, re-render -----
+        function resetQuiz() {
+            // rebuild questions with shuffled options
+            questions = buildShuffledQuestions();
+            renderQuiz();
+            // also hide all hints
+            document.querySelectorAll('.answer-hint').forEach(el => el.style.display = 'none');
+            document.getElementById('scoreDisplay').textContent = '0 / 0';
+        }
+
+        // ----- event listeners -----
+        document.addEventListener('DOMContentLoaded', function() {
+            renderQuiz();
+
+            document.getElementById('checkBtn').addEventListener('click', checkAnswers);
+            document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+
+            // update score live when radio changes
+            document.addEventListener('change', function(e) {
+                if (e.target && e.target.type === 'radio') {
+                    updateScore();
+                }
+            });
+        });
+
+        // add a little extra style for correct/wrong highlights
+        const style = document.createElement('style');
+        style.textContent = `
+            .option.correct-answer {
+                border-left: 5px solid #2d6a4f;
+                background: #e4f0e8;
+                border-radius: 8px;
+                padding-left: 0.6rem;
+            }
+            .option.wrong-answer {
+                border-left: 5px solid #b33c3c;
+                background: #fde8e8;
+                border-radius: 8px;
+                padding-left: 0.6rem;
+            }
+            .option.correct-answer label,
+            .option.wrong-answer label {
+                font-weight: 500;
+            }
+            .option.correct-answer .correct-badge {
+                display: inline-block;
+            }
+        `;
+        document.head.appendChild(style);
+
+    })();
+</script>
+</body>
+</html>
