@@ -39,12 +39,11 @@
             padding: 1.8rem 2rem 2rem 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
-            transition: all 0.1s ease;
             border: 1px solid #e7e2d6;
+            transition: border-color 0.2s;
         }
         .question-card:hover {
             border-color: #c9b8a6;
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
         }
         .q-text {
             font-size: 1.2rem;
@@ -92,6 +91,22 @@
             line-height: 1.45;
             color: #1e2b3c;
         }
+        .option.correct-highlight {
+            border-left: 5px solid #2d6a4f;
+            background: #e4f0e8;
+            border-radius: 8px;
+            padding-left: 0.6rem;
+        }
+        .option.wrong-highlight {
+            border-left: 5px solid #b33c3c;
+            background: #fde8e8;
+            border-radius: 8px;
+            padding-left: 0.6rem;
+        }
+        .option.correct-highlight label,
+        .option.wrong-highlight label {
+            font-weight: 500;
+        }
         .correct-badge {
             margin-left: 0.8rem;
             font-weight: 500;
@@ -114,8 +129,11 @@
             background: #f0ede7;
             padding: 0.3rem 1rem;
             border-radius: 40px;
-            display: inline-block;
+            display: none;
             border: 1px solid #d9d1c4;
+        }
+        .answer-hint.show {
+            display: inline-block;
         }
         .quiz-controls {
             display: flex;
@@ -156,11 +174,6 @@
             border-radius: 40px;
             font-size: 1rem;
         }
-        hr {
-            margin: 2.2rem 0 2rem 0;
-            border: none;
-            border-top: 1px solid #ddd6c9;
-        }
         .footer-note {
             text-align: center;
             font-size: 0.9rem;
@@ -192,7 +205,7 @@
 
 <script>
     (function() {
-        // ----- original data (correct answer marked with "+") -----
+        // ----- ALL questions (full list from your data) -----
         const rawQuestions = [
             { q: "Frederick I knelt down and begged for forgiveness from the Pope.", options: ["+1177-year", "=1171-year", "=1077-year", "=1170-year"] },
             { q: "In which centuries did the German economy rise?", options: ["+XIII-XV centuries", "=XIII-XIV centuries", "=XII-XV centuries", "=XII-XVI centuries"] },
@@ -350,7 +363,6 @@
             { q: "On the place of the city of Constantinople is the colony of the Greek city of Byzantium.", options: ["+ Megara", "= Messana", "= Mycenae", "= Miletus"] },
             { q: "Which regions were part of Byzantium?", options: ["+Balkan Peninsula, Asia Minor, Caucasus, Syria, Palestine, Egypt, Crete and Cyprus", "= Asia Minor and the southern part of the Balkan Peninsula", "=Balkan Peninsula, Greece, Asia Minor and Apennine Peninsula", "=Balkan Peninsula, Asia Minor, Iberian Peninsula"] },
             { q: "How was the Byzantine Empire formed?", options: ["+As a result of the division of the Roman Empire into two independent states", "= As a result of the military campaigns of the Roman generals to Asia Minor", "= As a result of the Phoenicians founding their colonies", "=As a result of the Greeks founding the colony of Megara"] },
-            { q: "Note the aspects that show that Hellenism took a strong place in the life of Byzantium. 1. In the hippodromes, the people used to watch the competitions of riders, wrestlers, gymnasts, and mimes. 2. As before, residents of the city were treated by doctors who were paid by the administration 3. Residents of the city were going to the communal baths 4. Byzantium preserved the science of the ancient period 5. Although the residents were considered free people, they could not participate in the People's Council or serve in the army. 6. In their schools, children were trained in military work, they were raised to be strong and resilient", options: ["+1,2,3,4", "=1,3,5", "=2,4,6", "=1,2,3,4,5,6"] },
             { q: "Note the aspects that show that Hellenism took a strong place in the life of Byzantium. 1. In the hippodromes, the people used to watch the competitions of riders, wrestlers, gymnasts, and mimes. 2. As before, residents of the city were treated by doctors who were paid by the administration 3. Residents of the city were going to the communal baths 4. Byzantium preserved the science of the ancient period 5. Although the residents were considered free people, they could not participate in the People's Council or serve in the army. 6. In their schools, children were trained in military work, they were raised to be strong and resilient", options: ["+1,2,3,4", "=1,3,5", "=2,4,6", "=1,2,3,4,5,6"] },
             { q: "Which city was the capital of the Eastern Roman Empire?", options: ["+Constantinople", "=Alexandria", "= Antioch", "= Edessa"] },
             { q: "In the Eastern Roman Empire, which language replaced Latin and became the official language?", options: ["+ Greek language", "= English language", "=Slavic language", "= French language"] },
@@ -517,7 +529,7 @@
             { q: "When was Muslim rule firmly established in all parts of the Delhi Sultanate?", options: ["+ in the XII-XIII centuries", "= X-XI centuries", "= XIII-XIV centuries", "= in the XI-XV centuries"] }
         ];
 
-        // ----- helper: shuffle array in place (Fisher–Yates) -----
+        // ----- helper: shuffle array (Fisher–Yates) -----
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -526,21 +538,18 @@
             return arr;
         }
 
-        // ----- build question objects with shuffled options, keep correct value -----
+        // ----- build question objects with shuffled options -----
         function buildShuffledQuestions() {
             return rawQuestions.map((item, idx) => {
-                // extract correct answer (remove leading "+")
                 const correctRaw = item.options.find(opt => opt.startsWith('+'));
                 const correctValue = correctRaw ? correctRaw.substring(1).trim() : '';
 
-                // build option objects: { label, isCorrect }
                 const optionObjs = item.options.map(opt => {
                     const isCorrect = opt.startsWith('+');
                     const label = opt.substring(1).trim();
                     return { label, isCorrect };
                 });
 
-                // shuffle
                 const shuffled = shuffleArray([...optionObjs]);
 
                 return {
@@ -554,9 +563,8 @@
 
         // ----- state -----
         let questions = buildShuffledQuestions();
-        let totalQuestions = questions.length;
 
-        // ----- render function -----
+        // ----- render -----
         function renderQuiz() {
             const container = document.getElementById('quiz-container');
             let html = '';
@@ -576,39 +584,37 @@
                 });
 
                 html += `</div>`;
-                // we don't show correct badge by default, will show on check
-                html += `<div class="answer-hint" id="hint-${q.id}" style="display:none;">✔ Correct: ${q.correctValue}</div>`;
+                html += `<div class="answer-hint" id="hint-${q.id}">✔ Correct: ${q.correctValue}</div>`;
                 html += `</div>`;
             });
 
             container.innerHTML = html;
-            updateScore(); // reset score display
+            // hide all hints initially
+            document.querySelectorAll('.answer-hint').forEach(el => el.classList.remove('show'));
+            updateScore();
         }
 
-        // ----- update score display -----
+        // ----- update score (counts only answered questions) -----
         function updateScore() {
             const allRadios = document.querySelectorAll('input[type="radio"]:checked');
             let correct = 0;
-            let total = 0;
-            // we count only questions that have at least one checked radio
-            const questionIds = new Set();
+            const answeredNames = new Set();
             allRadios.forEach(radio => {
-                const name = radio.name; // q{id}
-                questionIds.add(name);
+                const name = radio.name;
+                answeredNames.add(name);
                 if (radio.dataset.correct === 'true') {
                     correct++;
                 }
             });
-            // total = number of questions that have at least one checked radio
-            total = questionIds.size;
+            const total = answeredNames.size;
             document.getElementById('scoreDisplay').textContent = `${correct} / ${total}`;
         }
 
-        // ----- check answers: show correct/incorrect, reveal hints, mark correct -----
+        // ----- check answers: show correct/wrong highlights, reveal hints -----
         function checkAnswers() {
-            // clear previous marks
-            document.querySelectorAll('.option.correct-answer, .option.wrong-answer').forEach(el => {
-                el.classList.remove('correct-answer', 'wrong-answer');
+            // clear previous highlights
+            document.querySelectorAll('.option.correct-highlight, .option.wrong-highlight').forEach(el => {
+                el.classList.remove('correct-highlight', 'wrong-highlight');
             });
 
             let correctCount = 0;
@@ -621,8 +627,17 @@
                 const selectedRadio = questionDiv.querySelector(`input[name="q${q.id}"]:checked`);
                 const hint = document.getElementById(`hint-${q.id}`);
 
-                // show hint always when checking
-                if (hint) hint.style.display = 'inline-block';
+                // show hint
+                if (hint) hint.classList.add('show');
+
+                // highlight correct option always
+                const allOptions = questionDiv.querySelectorAll('.option');
+                allOptions.forEach(opt => {
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if (radio && radio.dataset.correct === 'true') {
+                        opt.classList.add('correct-highlight');
+                    }
+                });
 
                 if (selectedRadio) {
                     answeredCount++;
@@ -630,41 +645,20 @@
                     const isCorrect = selectedRadio.dataset.correct === 'true';
                     if (isCorrect) {
                         correctCount++;
-                        if (parentOption) parentOption.classList.add('correct-answer');
                     } else {
-                        if (parentOption) parentOption.classList.add('wrong-answer');
-                        // also highlight the correct option (green border)
-                        const allOptions = questionDiv.querySelectorAll('.option');
-                        allOptions.forEach(opt => {
-                            const radio = opt.querySelector('input[type="radio"]');
-                            if (radio && radio.dataset.correct === 'true') {
-                                opt.classList.add('correct-answer');
-                            }
-                        });
+                        if (parentOption) parentOption.classList.add('wrong-highlight');
                     }
-                } else {
-                    // if not answered, just show correct answer (green border) and hint
-                    const allOptions = questionDiv.querySelectorAll('.option');
-                    allOptions.forEach(opt => {
-                        const radio = opt.querySelector('input[type="radio"]');
-                        if (radio && radio.dataset.correct === 'true') {
-                            opt.classList.add('correct-answer');
-                        }
-                    });
                 }
             });
 
-            // update score
             document.getElementById('scoreDisplay').textContent = `${correctCount} / ${answeredCount}`;
         }
 
-        // ----- reset: reshuffle all options, clear selections, re-render -----
+        // ----- reset: rebuild shuffled questions, re-render -----
         function resetQuiz() {
-            // rebuild questions with shuffled options
             questions = buildShuffledQuestions();
             renderQuiz();
-            // also hide all hints
-            document.querySelectorAll('.answer-hint').forEach(el => el.style.display = 'none');
+            // hints are hidden by default via render
             document.getElementById('scoreDisplay').textContent = '0 / 0';
         }
 
@@ -675,38 +669,13 @@
             document.getElementById('checkBtn').addEventListener('click', checkAnswers);
             document.getElementById('resetBtn').addEventListener('click', resetQuiz);
 
-            // update score live when radio changes
+            // live score update on radio change
             document.addEventListener('change', function(e) {
                 if (e.target && e.target.type === 'radio') {
                     updateScore();
                 }
             });
         });
-
-        // add a little extra style for correct/wrong highlights
-        const style = document.createElement('style');
-        style.textContent = `
-            .option.correct-answer {
-                border-left: 5px solid #2d6a4f;
-                background: #e4f0e8;
-                border-radius: 8px;
-                padding-left: 0.6rem;
-            }
-            .option.wrong-answer {
-                border-left: 5px solid #b33c3c;
-                background: #fde8e8;
-                border-radius: 8px;
-                padding-left: 0.6rem;
-            }
-            .option.correct-answer label,
-            .option.wrong-answer label {
-                font-weight: 500;
-            }
-            .option.correct-answer .correct-badge {
-                display: inline-block;
-            }
-        `;
-        document.head.appendChild(style);
 
     })();
 </script>
