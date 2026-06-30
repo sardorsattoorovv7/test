@@ -70,9 +70,10 @@
             gap: 0.8rem;
             padding: 0.4rem 0 0.4rem 0.8rem;
             border-radius: 12px;
-            transition: background 0.1s;
+            transition: background 0.15s, border-color 0.15s;
             font-size: 1rem;
             border-left: 3px solid transparent;
+            position: relative;
         }
         .option:hover {
             background: #f6f3ed;
@@ -91,6 +92,8 @@
             line-height: 1.45;
             color: #1e2b3c;
         }
+
+        /* Highlight styles */
         .option.correct-highlight {
             border-left: 5px solid #2d6a4f;
             background: #e4f0e8;
@@ -107,21 +110,34 @@
         .option.wrong-highlight label {
             font-weight: 500;
         }
-        .correct-badge {
+
+        /* Result badge - appears next to user's selection */
+        .result-badge {
             margin-left: 0.8rem;
-            font-weight: 500;
-            color: #2d6a4f;
-            background: #e4f0e8;
+            font-weight: 600;
             padding: 0.1rem 0.9rem;
             border-radius: 30px;
             font-size: 0.8rem;
             letter-spacing: 0.3px;
-            border: 1px solid #b6d0bf;
             white-space: nowrap;
         }
-        .correct-badge::before {
+        .result-badge.correct {
+            color: #2d6a4f;
+            background: #d4edda;
+            border: 1px solid #b6d0bf;
+        }
+        .result-badge.correct::before {
             content: "✓ ";
         }
+        .result-badge.wrong {
+            color: #b33c3c;
+            background: #f8d7da;
+            border: 1px solid #e6b8b8;
+        }
+        .result-badge.wrong::before {
+            content: "✗ ";
+        }
+
         .answer-hint {
             margin-top: 0.6rem;
             font-size: 0.9rem;
@@ -135,6 +151,7 @@
         .answer-hint.show {
             display: inline-block;
         }
+
         .quiz-controls {
             display: flex;
             gap: 1.2rem;
@@ -167,6 +184,12 @@
         .quiz-controls .reset-btn:hover {
             background: #3a4652;
         }
+        .quiz-controls .show-all-btn {
+            background: #2d6a4f;
+        }
+        .quiz-controls .show-all-btn:hover {
+            background: #1e4d38;
+        }
         .score-box {
             font-weight: 500;
             background: #d9d1c4;
@@ -184,7 +207,7 @@
             .question-card { padding: 1.5rem; }
             .q-text { font-size: 1.05rem; flex-wrap: wrap; }
             .option { padding-left: 0.2rem; }
-            .correct-badge { margin-left: 0.3rem; font-size: 0.7rem; padding: 0.1rem 0.7rem; }
+            .result-badge { margin-left: 0.3rem; font-size: 0.7rem; padding: 0.1rem 0.7rem; }
             .quiz-controls { padding: 0.6rem 1rem; border-radius: 30px; }
         }
     </style>
@@ -194,18 +217,18 @@
     <h1>🏰 Medieval history · 3rd semester</h1>
 
     <div class="quiz-controls">
-        <button id="checkBtn">✅ Check answers</button>
+        <button id="showAllBtn" class="show-all-btn">📋 Show all correct answers</button>
         <button id="resetBtn" class="reset-btn">⟳ Reset</button>
         <span class="score-box" id="scoreDisplay">0 / 0</span>
     </div>
 
     <div id="quiz-container"></div>
-    <div class="footer-note">✧ 150+ questions · select your answer, then check ✧</div>
+    <div class="footer-note">✧ 150+ questions · select your answer, instantly see if you're right ✧</div>
 </div>
 
 <script>
     (function() {
-        // ----- ALL questions (full list from your data) -----
+        // ----- ALL questions (full list) -----
         const rawQuestions = [
             { q: "Frederick I knelt down and begged for forgiveness from the Pope.", options: ["+1177-year", "=1171-year", "=1077-year", "=1170-year"] },
             { q: "In which centuries did the German economy rise?", options: ["+XIII-XV centuries", "=XIII-XIV centuries", "=XII-XV centuries", "=XII-XVI centuries"] },
@@ -564,6 +587,71 @@
         // ----- state -----
         let questions = buildShuffledQuestions();
 
+        // ----- check individual answer instantly -----
+        function checkSingleAnswer(radio) {
+            const questionId = radio.name.replace('q', '');
+            const questionDiv = radio.closest('.question-card');
+            if (!questionDiv) return;
+
+            // Remove previous highlights and badges for this question only
+            questionDiv.querySelectorAll('.option.correct-highlight, .option.wrong-highlight').forEach(el => {
+                el.classList.remove('correct-highlight', 'wrong-highlight');
+            });
+            questionDiv.querySelectorAll('.result-badge').forEach(el => el.remove());
+
+            const allOptions = questionDiv.querySelectorAll('.option');
+            const selectedOption = radio.closest('.option');
+            const isCorrect = selectedOption && selectedOption.dataset.correct === 'true';
+
+            // Show the correct answer (highlight green)
+            allOptions.forEach(opt => {
+                if (opt.dataset.correct === 'true') {
+                    opt.classList.add('correct-highlight');
+                }
+            });
+
+            // Show user's result
+            if (isCorrect) {
+                const badge = document.createElement('span');
+                badge.className = 'result-badge correct';
+                badge.textContent = 'Correct';
+                selectedOption.appendChild(badge);
+            } else {
+                if (selectedOption) {
+                    selectedOption.classList.add('wrong-highlight');
+                    const badge = document.createElement('span');
+                    badge.className = 'result-badge wrong';
+                    badge.textContent = 'Wrong';
+                    selectedOption.appendChild(badge);
+                }
+            }
+
+            // Show hint (correct answer text)
+            const hint = document.getElementById(`hint-${questionId}`);
+            if (hint) hint.classList.add('show');
+
+            updateScore();
+        }
+
+        // ----- show all correct answers (without affecting user selections) -----
+        function showAllAnswers() {
+            questions.forEach(q => {
+                const questionDiv = document.querySelector(`.question-card[data-qid="${q.id}"]`);
+                if (!questionDiv) return;
+
+                // Highlight correct options
+                questionDiv.querySelectorAll('.option').forEach(opt => {
+                    if (opt.dataset.correct === 'true') {
+                        opt.classList.add('correct-highlight');
+                    }
+                });
+
+                // Show hint
+                const hint = document.getElementById(`hint-${q.id}`);
+                if (hint) hint.classList.add('show');
+            });
+        }
+
         // ----- render -----
         function renderQuiz() {
             const container = document.getElementById('quiz-container');
@@ -577,20 +665,20 @@
 
                 q.options.forEach((opt, optIdx) => {
                     const optionId = `q${q.id}_opt${optIdx}`;
-                    html += `<div class="option">`;
-                    html += `<input type="radio" name="q${q.id}" id="${optionId}" value="${opt.label}" data-correct="${opt.isCorrect}">`;
+                    html += `<div class="option" data-correct="${opt.isCorrect}" data-qid="${q.id}">`;
+                    html += `<input type="radio" name="q${q.id}" id="${optionId}" value="${opt.label}">`;
                     html += `<label for="${optionId}">${opt.label}</label>`;
                     html += `</div>`;
                 });
 
                 html += `</div>`;
-                html += `<div class="answer-hint" id="hint-${q.id}">✔ Correct: ${q.correctValue}</div>`;
+                html += `<div class="answer-hint" id="hint-${q.id}">✔ Correct answer: ${q.correctValue}</div>`;
                 html += `</div>`;
             });
 
             container.innerHTML = html;
-            // hide all hints initially
             document.querySelectorAll('.answer-hint').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.result-badge').forEach(el => el.remove());
             updateScore();
         }
 
@@ -602,7 +690,8 @@
             allRadios.forEach(radio => {
                 const name = radio.name;
                 answeredNames.add(name);
-                if (radio.dataset.correct === 'true') {
+                const parentOpt = radio.closest('.option');
+                if (parentOpt && parentOpt.dataset.correct === 'true') {
                     correct++;
                 }
             });
@@ -610,55 +699,10 @@
             document.getElementById('scoreDisplay').textContent = `${correct} / ${total}`;
         }
 
-        // ----- check answers: show correct/wrong highlights, reveal hints -----
-        function checkAnswers() {
-            // clear previous highlights
-            document.querySelectorAll('.option.correct-highlight, .option.wrong-highlight').forEach(el => {
-                el.classList.remove('correct-highlight', 'wrong-highlight');
-            });
-
-            let correctCount = 0;
-            let answeredCount = 0;
-
-            questions.forEach(q => {
-                const questionDiv = document.querySelector(`.question-card[data-qid="${q.id}"]`);
-                if (!questionDiv) return;
-
-                const selectedRadio = questionDiv.querySelector(`input[name="q${q.id}"]:checked`);
-                const hint = document.getElementById(`hint-${q.id}`);
-
-                // show hint
-                if (hint) hint.classList.add('show');
-
-                // highlight correct option always
-                const allOptions = questionDiv.querySelectorAll('.option');
-                allOptions.forEach(opt => {
-                    const radio = opt.querySelector('input[type="radio"]');
-                    if (radio && radio.dataset.correct === 'true') {
-                        opt.classList.add('correct-highlight');
-                    }
-                });
-
-                if (selectedRadio) {
-                    answeredCount++;
-                    const parentOption = selectedRadio.closest('.option');
-                    const isCorrect = selectedRadio.dataset.correct === 'true';
-                    if (isCorrect) {
-                        correctCount++;
-                    } else {
-                        if (parentOption) parentOption.classList.add('wrong-highlight');
-                    }
-                }
-            });
-
-            document.getElementById('scoreDisplay').textContent = `${correctCount} / ${answeredCount}`;
-        }
-
         // ----- reset: rebuild shuffled questions, re-render -----
         function resetQuiz() {
             questions = buildShuffledQuestions();
             renderQuiz();
-            // hints are hidden by default via render
             document.getElementById('scoreDisplay').textContent = '0 / 0';
         }
 
@@ -666,13 +710,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             renderQuiz();
 
-            document.getElementById('checkBtn').addEventListener('click', checkAnswers);
+            // "Show all correct answers" button
+            document.getElementById('showAllBtn').addEventListener('click', showAllAnswers);
+
+            // Reset button
             document.getElementById('resetBtn').addEventListener('click', resetQuiz);
 
-            // live score update on radio change
+            // Live check on radio change (instant feedback)
             document.addEventListener('change', function(e) {
                 if (e.target && e.target.type === 'radio') {
-                    updateScore();
+                    checkSingleAnswer(e.target);
                 }
             });
         });
