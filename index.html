@@ -1,2095 +1,716 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="utf-8">
-<title>3D Qurilish Konstruktori - Ultimate</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-  * { box-sizing: border-box; margin:0; padding:0; }
-  html, body { overflow: hidden; background: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif; height:100%; }
-  #canvas-wrap { position: fixed; inset: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informatika Olimpiada - Tuman Bosqichi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  #panel {
-    position: fixed; top: 0; left: 0; bottom: 0; width: 500px;
-    background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
-    color: #1e293b; padding: 14px 16px; overflow-y: auto; z-index: 10;
-    border-right: 1px solid rgba(0,0,0,0.06);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 2px 0 24px rgba(0,0,0,0.05);
-  }
-  #panel.collapsed { transform: translateX(-500px); }
-  #panel::-webkit-scrollbar { width:4px; }
-  #panel::-webkit-scrollbar-track { background:transparent; }
-  #panel::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-  #panel h1 { font-size:19px; margin:0 0 10px 0; display:flex; align-items:center; gap:10px; color:#0f172a; font-weight:700; }
-  #panel h2 { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; margin:14px 0 6px 0; border-bottom:2px solid #f1f5f9; padding-bottom:4px; font-weight:700; display:flex; align-items:center; gap:6px; }
-  .row { display:flex; gap:6px; margin-bottom:5px; flex-wrap:wrap; }
-  .field { flex:1; min-width:55px; display:flex; flex-direction:column; gap:2px; }
-  label { font-size:9px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
-  input[type=number], select {
-    background:#f8fafc; border:1.5px solid #e2e8f0; color:#0f172a; border-radius:6px;
-    padding:4px 7px; font-size:12px; width:100%; transition:all 0.15s;
-  }
-  input[type=number]:focus, select:focus { border-color:#3b82f6; outline:none; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
-  input[type=range] { width:100%; accent-color:#3b82f6; height:4px; }
-  .range-label { font-size:10px; color:#64748b; text-align:center; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
 
-  button {
-    background:#3b82f6; color:white; border:none; border-radius:7px; padding:7px 12px;
-    font-size:12px; cursor:pointer; width:100%; margin-top:3px; font-weight:600;
-    transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:6px;
-  }
-  button:hover { background:#2563eb; transform:translateY(-1px); box-shadow:0 4px 12px rgba(59,130,246,0.3); }
-  button:active { transform:translateY(0); }
-  button.secondary { background:#f1f5f9; color:#1e293b; }
-  button.secondary:hover { background:#e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
-  button.danger { background:#ef4444; }
-  button.danger:hover { background:#dc2626; box-shadow:0 4px 12px rgba(239,68,68,0.3); }
-  button.success { background:#22c55e; }
-  button.success:hover { background:#16a34a; box-shadow:0 4px 12px rgba(34,197,94,0.3); }
-  button.purple { background:#8b5cf6; }
-  button.purple:hover { background:#7c3aed; box-shadow:0 4px 12px rgba(139,92,246,0.3); }
-  button.orange { background:#f59e0b; }
-  button.orange:hover { background:#d97706; box-shadow:0 4px 12px rgba(245,158,11,0.3); }
-  button.small { padding:4px 8px; font-size:10px; width:auto; }
-  .btnrow { display:flex; gap:4px; flex-wrap:wrap; }
-  .btnrow button { flex:1; min-width:50px; }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  .badge { display:inline-flex; align-items:center; gap:4px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:4px; padding:1px 6px; font-size:9px; color:#1e293b; margin-right:2px; }
-  .item-list { max-height:100px; overflow-y:auto; font-size:11px; }
-  .item-list::-webkit-scrollbar { width:3px; }
-  .item-list::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
-  .item-row { display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; margin-bottom:2px; background:#f8fafc; border:1px solid #e2e8f0; cursor:pointer; }
-  .item-row:hover { background:#f1f5f9; }
-  .item-row.selected { outline:2px solid #3b82f6; background:#eff6ff; }
-  .item-row span { flex:1; cursor:pointer; font-size:11px; display:flex; align-items:center; gap:5px; }
-  .item-del { background:#ef4444; border:none; color:white; border-radius:3px; width:18px; height:18px; font-size:9px; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center; }
-  .item-del:hover { background:#dc2626; }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 600;
+        }
 
-  .toggle-panel-btn {
-    position:fixed; top:12px; left:12px; z-index:20; background:#f8fafc; color:#1e293b;
-    border:1px solid #e2e8f0; border-radius:8px; width:38px; height:38px; cursor:pointer; font-size:16px;
-    transition:all 0.15s; display:flex; align-items:center; justify-content:center;
-  }
-  .toggle-panel-btn:hover { background:#f1f5f9; }
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 120px;
+            text-align: center;
+        }
 
-  #hud {
-    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-    background:rgba(255,255,255,0.96); color:#1e293b; padding:6px 18px; border-radius:24px;
-    font-size:11px; z-index:10; display:flex; gap:16px; align-items:center;
-    box-shadow:0 2px 16px rgba(0,0,0,0.06); border:1px solid #e2e8f0;
-    backdrop-filter:blur(4px);
-  }
-  #stats {
-    position:fixed; top:14px; right:14px; background:rgba(255,255,255,0.95);
-    color:#1e293b; padding:5px 12px; border-radius:8px; font-size:11px; z-index:10;
-    border:1px solid #e2e8f0; backdrop-filter:blur(4px); display:flex; align-items:center; gap:6px;
-  }
-  #modehint {
-    position:fixed; top:60px; right:14px; background:#3b82f6; color:white;
-    padding:5px 14px; border-radius:6px; font-size:11px; z-index:10; display:none;
-    box-shadow:0 4px 12px rgba(59,130,246,0.3); align-items:center; gap:6px;
-  }
+        .timer.warning {
+            background: #e74c3c;
+        }
 
-  .panel-count-box {
-    background:linear-gradient(135deg, #f0fdf4, #dcfce7);
-    border:2px solid #22c55e;
-    border-radius:10px;
-    padding:10px;
-    margin:6px 0;
-    text-align:center;
-  }
-  .panel-count-box .number { font-size:30px; font-weight:800; color:#15803d; }
-  .panel-count-box .label { font-size:10px; color:#475569; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
-  .panel-count-box .detail { font-size:10px; color:#64748b; margin-top:2px; }
+        .content {
+            padding: 50px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
 
-  #drawingToggleBtn {
-    position:fixed; top:12px; right:14px; z-index:20;
-    width:auto; margin:0; padding:7px 16px;
-    background:#0f172a; color:#fff; border-radius:8px; font-size:12px;
-    border:none; cursor:pointer; font-weight:600;
-    transition:all 0.15s;
-  }
-  #drawingToggleBtn:hover { background:#1e293b; transform:translateY(-1px); }
+        .question-container {
+            margin-bottom: 50px;
+            padding: 25px;
+            border-left: 5px solid #2c3e50;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
 
-  #drawingPanel {
-    position:fixed; top:0; right:0; bottom:0; width:620px;
-    background:#ffffff; z-index:25; border-left:1px solid #e2e8f0;
-    box-shadow:-4px 0 24px rgba(0,0,0,0.06);
-    display:none; flex-direction:column;
-    animation:slideIn 0.3s ease;
-  }
-  @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-  #drawingPanel.open { display:flex; }
-  #drawingPanelHead {
-    padding:10px 18px; border-bottom:1px solid #e2e8f0; display:flex;
-    align-items:center; justify-content:space-between; flex-shrink:0;
-    background:#fafafa;
-  }
-  #drawingPanelHead h3 { margin:0; font-size:14px; color:#0f172a; display:flex; align-items:center; gap:8px; }
-  #drawingPanelHead button { width:auto; margin:0; padding:4px 12px; font-size:11px; }
-  #drawingBody { flex:1; overflow-y:auto; padding:12px 16px; background:#f8fafc; }
-  #drawingBody::-webkit-scrollbar { width:4px; }
-  #drawingBody::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
 
-  .overview-card {
-    border:2px solid #3b82f6; border-radius:8px; margin-bottom:16px; overflow:hidden;
-    background:#fff; box-shadow:0 2px 8px rgba(59,130,246,0.1);
-  }
-  .overview-card .ov-title {
-    background:#eff6ff; padding:6px 12px; font-size:13px; font-weight:700; color:#1e293b;
-    border-bottom:1px solid #bfdbfe; display:flex; justify-content:space-between; align-items:center;
-  }
-  .overview-card .ov-svg-wrap { padding:8px; background:#fff; overflow:auto; text-align:center; }
-  .overview-card .ov-svg-wrap svg { max-width:100%; height:auto; }
+        .question-number {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-  .wall-drawing-card {
-    border:1px solid #e2e8f0; border-radius:8px; margin-bottom:12px; overflow:hidden;
-    background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.04);
-  }
-  .wall-drawing-card .wd-title {
-    background:#f8fafc; padding:5px 12px; font-size:12px; font-weight:600; color:#1e293b;
-    border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;
-  }
-  .wall-drawing-card .wd-svg-wrap { padding:8px; background:#fff; overflow:auto; text-align:center; }
-  .wall-drawing-card .wd-svg-wrap svg { max-width:100%; height:auto; }
-  .wall-drawing-card .wd-coords {
-    font-size:10px; color:#475569; padding:4px 12px 8px 12px; font-family:'Consolas',monospace;
-    background:#fafafa; border-top:1px dashed #e2e8f0;
-  }
-  .wall-drawing-card .wd-coords div { padding:1px 0; }
+        .question-points {
+            background: #2c3e50;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-  #specsPanel {
-    position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
-    background:#fff; border:1px solid #e2e8f0; border-radius:12px;
-    padding:14px 20px; z-index:15; display:none; box-shadow:0 8px 32px rgba(0,0,0,0.12);
-    min-width:420px; max-width:92%; max-height:60vh; overflow-y:auto;
-    animation:slideUp 0.25s ease;
-  }
-  @keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
-  #specsPanel.open { display:block; }
-  #specsPanel::-webkit-scrollbar { width:4px; }
-  #specsPanel::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
-  #specsPanel h3 { margin:0 0 8px 0; font-size:15px; color:#0f172a; display:flex; align-items:center; gap:8px; }
-  #specsPanel table { width:100%; border-collapse:collapse; font-size:12px; }
-  #specsPanel th, #specsPanel td { padding:4px 8px; border:1px solid #e2e8f0; text-align:left; }
-  #specsPanel th { background:#f8fafc; font-weight:600; color:#475569; }
-  #specsPanel .total-row { background:#f0fdf4; font-weight:700; }
-  #specsPanel .close-specs { float:right; background:#f1f5f9; border:none; padding:2px 10px; border-radius:4px; cursor:pointer; font-size:12px; }
-  #specsPanel .close-specs:hover { background:#e2e8f0; }
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+        }
 
-  .shortcut-hint {
-    font-size:8px; color:#94a3b8; display:inline-block;
-    background:#f1f5f9; padding:1px 5px; border-radius:3px;
-    border:1px solid #e2e8f0; font-weight:600;
-  }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-  .icon-title { display:inline-flex; align-items:center; gap:6px; }
+        .option {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 18px;
+            border: 2px solid #d0d0d0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
 
-  @media (max-width:768px) {
-    #panel { width:340px; }
-    #panel.collapsed { transform:translateX(-340px); }
-    #drawingPanel { width:100%; }
-    #specsPanel { min-width:auto; width:92%; bottom:75px; }
-    #hud { font-size:10px; gap:10px; padding:5px 12px; flex-wrap:wrap; justify-content:center; }
-    #stats { font-size:10px; padding:4px 10px; }
-    .panel-count-box .number { font-size:24px; }
-  }
-  @media (max-width:480px) {
-    #panel { width:290px; }
-    #panel.collapsed { transform:translateX(-290px); }
-    #panel h1 { font-size:16px; }
-    .row { gap:4px; }
-    .field { min-width:45px; }
-    input[type=number], select { font-size:11px; padding:3px 5px; }
-    button { font-size:11px; padding:5px 8px; }
-  }
-</style>
+        .option:hover {
+            border-color: #2c3e50;
+            background: #f0f5f9;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 14px;
+            margin-top: 2px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #2c3e50;
+            flex-shrink: 0;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            user-select: none;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .option.selected {
+            border-color: #2c3e50;
+            background: #e8f4f8;
+        }
+
+        .option.selected label {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .footer {
+            padding: 30px 50px;
+            background: #f9f9f9;
+            display: flex;
+            gap: 20px;
+            justify-content: flex-end;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(44, 62, 80, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-reset:hover {
+            background: #d5dbdd;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-display {
+            font-size: 56px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .score-display.high {
+            color: #27ae60;
+        }
+
+        .score-display.low {
+            color: #e74c3c;
+        }
+
+        .results-text {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .results-info {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 5px solid #2c3e50;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .results-info p {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .answered-counter {
+            font-size: 14px;
+            color: #666;
+            margin-top: 25px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .question-container {
+                margin-bottom: 35px;
+                padding: 18px;
+            }
+
+            .footer {
+                flex-direction: column;
+                padding: 20px 25px;
+            }
+
+            .results {
+                padding: 30px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Informatika Olimpiada</h1>
+                <p style="font-size: 14px; margin-top: 5px;">Tuman Bosqichi - 30 ta savol</p>
+            </div>
+            <div class="timer" id="timer">90:00</div>
+        </div>
 
-<div id="canvas-wrap"></div>
+        <div class="content" id="content">
+            <div id="questions-container"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="answered-counter" id="answered-counter">Javoblar: 0/30</div>
+        </div>
 
-<button class="toggle-panel-btn" id="togglePanel"><i class="fa-solid fa-bars"></i></button>
-<button id="drawingToggleBtn"><i class="fa-solid fa-ruler-combined"></i> Chizmalar</button>
+        <div class="results" id="results">
+            <h2 style="margin-bottom: 20px;">Test Natijalari</h2>
+            <div class="score-display" id="score-display">0%</div>
+            <div class="results-text" id="results-message"></div>
+            <div class="results-info">
+                <p id="results-details"></p>
+            </div>
+        </div>
 
-<div id="panel">
-  <h1><i class="fa-solid fa-trowel-bricks"></i> Qurilish Konstruktori <span style="font-size:10px;color:#64748b;font-weight:400;">v2.0</span></h1>
-
-  <h2><i class="fa-solid fa-ruler"></i> Bino parametrlari</h2>
-  <div class="row">
-    <div class="field"><label>Uzunlik L (m)</label><input type="number" id="L_total" value="14.5" step="0.1" min="0.5"></div>
-    <div class="field"><label>Eni W (m)</label><input type="number" id="W_total" value="11.0" step="0.1" min="0.5"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Balandlik H (m)</label><input type="number" id="H_total" value="3.0" step="0.1" min="1"></div>
-    <div class="field"><label>Devor qalinligi (m)</label><input type="number" id="wallThickness" value="0.1" step="0.01" min="0.02"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Panel eni (m)</label><input type="number" id="panelWidth" value="0.96" step="0.01" min="0.3"></div>
-    <div class="field"><label>Burchak paneli (m)</label><input type="number" id="cornerSize" value="0.96" step="0.01" min="0.1"></div>
-  </div>
-  <div class="btnrow">
-    <button id="buildRectBtn" class="success"><i class="fa-solid fa-building"></i> 3 kamerali</button>
-    <button id="buildSimpleBtn" class="secondary"><i class="fa-regular fa-square"></i> Oddiy bino</button>
-    <button id="buildLShapeBtn" class="purple"><i class="fa-solid fa-draw-polygon"></i> L-shakl</button>
-  </div>
-
-  <h2><i class="fa-solid fa-block-brick"></i> Devor qoshish</h2>
-  <div class="btnrow">
-    <button id="drawWallBtn" class="secondary" style="flex:2;"><i class="fa-solid fa-pen"></i> Chizish rejimi</button>
-    <button id="snapToggleBtn" class="secondary small" style="flex:1;"><i class="fa-solid fa-link"></i> Snap</button>
-  </div>
-  <div class="row" style="margin-top:4px;">
-    <div class="field"><label>X1 (A)</label><input type="number" id="wx1" value="0" step="0.1"></div>
-    <div class="field"><label>Z1 (A)</label><input type="number" id="wz1" value="0" step="0.1"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>X2 (B)</label><input type="number" id="wx2" value="8" step="0.1"></div>
-    <div class="field"><label>Z2 (B)</label><input type="number" id="wz2" value="0" step="0.1"></div>
-  </div>
-  <button class="secondary" id="addWallManual"><i class="fa-solid fa-plus"></i> Qolda devor qoshish</button>
-
-  <h2><i class="fa-solid fa-pen-to-square"></i> Devorni tahrirlash</h2>
-  <div class="row">
-    <div class="field"><label>A X</label><input type="number" id="editX1" step="0.1"></div>
-    <div class="field"><label>A Z</label><input type="number" id="editZ1" step="0.1"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>B X</label><input type="number" id="editX2" step="0.1"></div>
-    <div class="field"><label>B Z</label><input type="number" id="editZ2" step="0.1"></div>
-  </div>
-  <div class="btnrow">
-    <button class="secondary small" id="updateWallBtn"><i class="fa-solid fa-rotate"></i> Yangilash</button>
-    <button class="danger small" id="deleteSelectedBtn"><i class="fa-solid fa-trash"></i> O'chirish</button>
-    <button class="secondary small" id="duplicateBtn"><i class="fa-regular fa-copy"></i> Dublikat</button>
-  </div>
-
-  <h2><i class="fa-solid fa-door-open"></i> Eshik qoshish</h2>
-  <div class="field" style="margin-bottom:4px;">
-    <label>Qaysi devorga</label>
-    <select id="doorWallSelect"><option value="">— devor tanlang —</option></select>
-  </div>
-  <div class="row">
-    <div class="field"><label>Kenglik (m)</label><input type="number" id="doorW" value="0.96" step="0.05" min="0.3"></div>
-    <div class="field"><label>Balandlik (m)</label><input type="number" id="doorH" value="2.0" step="0.05" min="0.5"></div>
-  </div>
-  <div class="row">
-    <div class="field">
-      <label>Devordagi joyi</label>
-      <input type="range" id="doorOffset" min="0" max="100" value="50">
-      <span class="range-label" id="doorOffsetLabel">50%</span>
+        <div class="footer">
+            <button class="btn-reset" onclick="resetQuiz()">Qayta boshlash</button>
+            <button class="btn-submit" onclick="submitQuiz()">Testni tugatish</button>
+        </div>
     </div>
-  </div>
-  <div class="btnrow">
-    <button id="addDoorBtn"><i class="fa-solid fa-door-closed"></i> Qoshish</button>
-    <button id="addMultipleDoorsBtn" class="secondary small"><i class="fa-solid fa-plus"></i> 3 ta qoshish</button>
-  </div>
 
-  <h2><i class="fa-solid fa-chart-simple"></i> Panel hisobi</h2>
-  <div class="panel-count-box">
-    <div class="label">JAMI PANELLAR</div>
-    <div class="number" id="totalPanelsDisplay">0</div>
-    <div class="detail" id="panelDetail">Devor: 0 | Tom: 0 | Pol: 0</div>
-    <div class="detail" id="doorDetail">Eshiklar: 0 ta (maydoni: 0 m²)</div>
-  </div>
-  <div class="btnrow">
-    <button id="showSpecsBtn" class="secondary"><i class="fa-solid fa-list-check"></i> Spetsifikatsiya</button>
-    <button id="exportDataBtn" class="secondary small"><i class="fa-solid fa-file-export"></i> Eksport</button>
-  </div>
+    <script>
+        const questions = [
+            // 1-qism: 0.9 ball
+            {
+                question: "Google kompaniyasi rasman qachon ro'yxatdan o'tgan?",
+                options: ["2003-yil 14-fevral", "1999-yil 4-sentabr", "2004-yil 4-mart", "1998-yil 4-sentabr"],
+                correct: 1,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "CMS platformasining vazifasiga ko'ra turlarini aniqlang.",
+                options: ["Ochiq va yopiq kodli", "Yuqori ixtisoslashgan va universal", "cMOOC va xMOOC", "LMS va MOOC"],
+                correct: 3,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Dastur natijasini aniqlang:\nx='Python dasturlash tili'\nprint('python' in x)",
+                options: ["false", "true", "python", "dasturlash tili"],
+                correct: 1,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Birinchi web-sayt nomi keltirilgan qatorni toping.",
+                options: ["info.cern.ch", "web.cern.org", "tim.org.ch", "ms.dos.org"],
+                correct: 0,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Ms Word dasturida qaysi tugmalar yordamida matnga joriy vaqtni (soat) kiritish mumkin?",
+                options: ["Shift+Ctrl+T", "Shift+Tab+D", "Shift+Alt+D", "Shift+Alt+T"],
+                correct: 3,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Quyidagilardan qaysi biri Python dasturlash tili moduli emas?",
+                options: ["locale", "tkinter", "os", "ceil"],
+                correct: 3,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Dastur natijasini aniqlang: print(-9//2)",
+                options: ["4", "-4", "-5", "5"],
+                correct: 2,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\na=0x1122\nprint(a)",
+                options: ["1122", "10442", "4386", "0"],
+                correct: 1,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Quyidagi formula natijasini aniqlang:\n=КОРЕНЬ(НОК(60;45;80)+ДЛСТР(ПРАВСИМВ(\"texnologiyalar\";9)))",
+                options: ["27", "23", "18", "16"],
+                correct: 1,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
+            {
+                question: "Power Point dasturi slaydlar namoyishi rejimida bitta oldingi slaydga klaviaturaning qaysi tugmasi yordamida o'tiladi?",
+                options: ["Ctrl+B", "P", "B", "Alt+P"],
+                correct: 2,
+                points: "0.9 ball",
+                section: "1-qism"
+            },
 
-  <h2><i class="fa-solid fa-layer-group"></i> Elementlar</h2>
-  <div style="font-size:9px; color:#64748b; margin-bottom:2px;">Devorlar</div>
-  <div class="item-list" id="wallList"></div>
-  <div style="font-size:9px; color:#64748b; margin:4px 0 2px 0;">Eshiklar</div>
-  <div class="item-list" id="doorList"></div>
+            // 2-qism: 1.5 ball
+            {
+                question: "Dastur natijasini aniqlang:\nprint((lambda x: x**3)(lambda x: x+2)(2))\nprint((lambda x: x**3)(lambda x: x+3)(3))",
+                options: ["4, 6", "4, 7", "64, 216", "TypeError"],
+                correct: 3,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Natijani aniqlang:\ns={2,0,3,1, 4}\nprint(s[-2])",
+                options: ["0", "1", "3", "Dastur xato"],
+                correct: 3,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Natijani aniqlang:\na = 10\nprint(~a)",
+                options: ["False", "True", "-10", "-11"],
+                correct: 3,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "MP3 formatida qo'llab-quvvatlanadigan eng yuqori audio sifati necha kbps bo'ladi?",
+                options: ["256 kbps", "320 kbps", "480 kbps", "96 kbps"],
+                correct: 1,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Dastur natijasini aniqlang: print(-12|-8)",
+                options: ["-4", "False", "-12", "True"],
+                correct: 3,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\na = b'informatika'\nprint(a)",
+                options: ["informatika", "b'informatika'", "binformatika", "TypeError"],
+                correct: 1,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\nfirst = 'python'\nsecond = ' '\nfor i in first:\n    second = i + second\nprint(second)",
+                options: ["nohtyp", "pythonpythonpythonpythonpython", "iiiiii", "python"],
+                correct: 0,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "Natijani toping: print(int(True))",
+                options: ["0", "True", "1", "TypeError"],
+                correct: 2,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "135, B6, 703 butun sonlarni barchasini yozish mumkin bo'lgan eng kichik asosli sanoq sistemasida shu sonlar yig'indisini hisoblang.",
+                options: ["932", "1322", "922", "1232"],
+                correct: 1,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
+            {
+                question: "O'n oltilik sanoq sistemasidagi 12B,84 sonini o'nlik sanoq sistemasida ifodalang.",
+                options: ["292, 224511", "299, 515625", "464, 552718", "384, 452319"],
+                correct: 1,
+                points: "1.5 ball",
+                section: "2-qism"
+            },
 
-  <h2><i class="fa-solid fa-sliders"></i> Boshqarish</h2>
-  <div class="btnrow">
-    <button class="secondary small" id="saveBtn"><i class="fa-solid fa-floppy-disk"></i> Saqlash</button>
-    <button class="secondary small" id="undoWallBtn"><i class="fa-solid fa-rotate-left"></i> Devor</button>
-    <button class="secondary small" id="undoDoorBtn"><i class="fa-solid fa-rotate-left"></i> Eshik</button>
-  </div>
-  <button class="danger small" id="clearBtn"><i class="fa-solid fa-trash-can"></i> Hammasini tozalash</button>
-
-  <h2><i class="fa-solid fa-gear"></i> Qoshimcha</h2>
-  <label><input type="checkbox" id="roofChk" checked> Tom qoshish</label>
-  <label style="margin-left:12px;"><input type="checkbox" id="floorChk" checked> Pol qoshish</label>
-  <label style="margin-left:12px;"><input type="checkbox" id="snapChk" checked> Snap</label>
-  
-  <div style="font-size:9px; color:#94a3b8; margin-top:10px; border-top:1px solid #e2e8f0; padding-top:8px;">
-    <span class="shortcut-hint">CTRL+Z</span> Bekor qilish 
-    <span class="shortcut-hint">CTRL+Y</span> Qaytarish<br>
-    <span class="shortcut-hint">CTRL+C</span> Nusxalash 
-    <span class="shortcut-hint">CTRL+V</span> Joylashtirish 
-    <span class="shortcut-hint">CTRL+D</span> Dublikat<br>
-    <span class="shortcut-hint">Delete</span> O'chirish 
-    <span class="shortcut-hint">ESC</span> Chizishdan chiqish
-  </div>
-</div>
-
-<div id="drawingPanel">
-  <div id="drawingPanelHead">
-    <h3><i class="fa-solid fa-ruler-combined"></i> Texnik chizmalar</h3>
-    <div>
-      <button class="secondary" id="drawingExportSVG" style="margin-right:4px;"><i class="fa-solid fa-download"></i> SVG</button>
-      <button class="secondary" id="drawingExportPNG" style="margin-right:4px;"><i class="fa-solid fa-download"></i> PNG</button>
-      <button class="secondary" id="drawingExportDXF" style="margin-right:4px;"><i class="fa-solid fa-download"></i> DXF</button>
-      <button class="secondary" id="closeDrawingPanel"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-  </div>
-  <div id="drawingBody">
-    <div id="wallDrawingsContainer"></div>
-  </div>
-</div>
-
-<div id="specsPanel">
-  <button class="close-specs" id="closeSpecs"><i class="fa-solid fa-xmark"></i></button>
-  <h3><i class="fa-solid fa-list-check"></i> Panel spetsifikatsiyasi</h3>
-  <div id="specsContent"></div>
-</div>
-
-<div id="modehint"><i class="fa-solid fa-pen"></i> Boshlanish nuqtasini bosing (A nuqta)</div>
-<div id="stats"><i class="fa-solid fa-block-brick"></i> Devor: 0 | <i class="fa-solid fa-door-closed"></i> Eshik: 0 | <i class="fa-solid fa-link"></i> Snap</div>
-<div id="hud">
-  <span id="panelInfo">Tanlangan: yoq</span>
-  <span class="badge" id="panelTotal"><i class="fa-solid fa-layer-group"></i> Panellar: 0</span>
-  <span class="badge" id="dimensionInfo">L:0 W:0 H:0</span>
-  <button id="showSpecsBtnMini" class="badge" style="background:#3b82f6;color:#fff;border:none;cursor:pointer;font-weight:600;"><i class="fa-solid fa-list-check"></i></button>
-  <button id="exportPDFBtn" class="badge" style="background:#dc2626;color:#fff;border:none;cursor:pointer;font-weight:600;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-</div>
-
-<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/controls/DragControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script>
-const { OrbitControls, DragControls } = THREE;
-
-// ===== STATE =====
-let walls = [];
-let doors = [];
-let wallCounter = 0;
-let doorCounter = 0;
-let selectedWallId = null;
-let clipboardWall = null;
-let snapEnabled = true;
-let snapDistance = 0.3;
-
-// ===== UNDO/REDO SYSTEM =====
-let undoStack = [];
-let redoStack = [];
-const MAX_UNDO = 50;
-
-function saveState() {
-    const state = {
-        walls: JSON.parse(JSON.stringify(walls)),
-        doors: JSON.parse(JSON.stringify(doors)),
-        wallCounter: wallCounter,
-        doorCounter: doorCounter,
-        selectedWallId: selectedWallId
-    };
-    undoStack.push(state);
-    if (undoStack.length > MAX_UNDO) undoStack.shift();
-    redoStack = [];
-    autoSaveToLocalStorage();
-}
-
-function undo() {
-    if (undoStack.length <= 1) { console.log('Bekor qilish uchun amal yoq'); return false; }
-    const currentState = {
-        walls: JSON.parse(JSON.stringify(walls)),
-        doors: JSON.parse(JSON.stringify(doors)),
-        wallCounter: wallCounter,
-        doorCounter: doorCounter,
-        selectedWallId: selectedWallId
-    };
-    redoStack.push(currentState);
-    const prevState = undoStack[undoStack.length - 2];
-    restoreState(prevState);
-    undoStack.pop();
-    console.log('Bekor qilindi');
-    return true;
-}
-
-function redo() {
-    if (redoStack.length === 0) { console.log('Qaytarish uchun amal yoq'); return false; }
-    const nextState = redoStack.pop();
-    const currentState = {
-        walls: JSON.parse(JSON.stringify(walls)),
-        doors: JSON.parse(JSON.stringify(doors)),
-        wallCounter: wallCounter,
-        doorCounter: doorCounter,
-        selectedWallId: selectedWallId
-    };
-    undoStack.push(currentState);
-    restoreState(nextState);
-    console.log('Qaytarildi');
-    return true;
-}
-
-function restoreState(state) {
-    walls = JSON.parse(JSON.stringify(state.walls));
-    doors = JSON.parse(JSON.stringify(state.doors));
-    wallCounter = state.wallCounter;
-    doorCounter = state.doorCounter;
-    selectedWallId = state.selectedWallId;
-    rebuildScene();
-    syncFormFromSelection();
-}
-
-function autoSaveToLocalStorage() {
-    try {
-        const data = {
-            walls: JSON.parse(JSON.stringify(walls)),
-            doors: JSON.parse(JSON.stringify(doors)),
-            wallCounter: wallCounter,
-            doorCounter: doorCounter,
-            selectedWallId: selectedWallId,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('qurilish_konstruktori_data', JSON.stringify(data));
-    } catch(e) { console.warn('Auto-save xatolik:', e); }
-}
-
-function loadFromLocalStorage() {
-    try {
-        const saved = localStorage.getItem('qurilish_konstruktori_data');
-        if (!saved) return false;
-        const data = JSON.parse(saved);
-        if (!data.walls || !data.doors) return false;
-        walls = JSON.parse(JSON.stringify(data.walls));
-        doors = JSON.parse(JSON.stringify(data.doors));
-        wallCounter = data.wallCounter || 0;
-        doorCounter = data.doorCounter || 0;
-        selectedWallId = data.selectedWallId || null;
-        undoStack = [];
-        redoStack = [];
-        rebuildScene();
-        syncFormFromSelection();
-        saveState();
-        console.log('Loyiha yuklandi!');
-        return true;
-    } catch(e) {
-        console.warn('Yuklashda xatolik:', e);
-        return false;
-    }
-}
-
-// ===== GETTERS =====
-function getPanelWidth() { return parseFloat(document.getElementById('panelWidth').value) || 0.96; }
-function getCornerSize() { return parseFloat(document.getElementById('cornerSize').value) || 0.96; }
-function getH() { return parseFloat(document.getElementById('H_total').value) || 3.0; }
-function getT() { return parseFloat(document.getElementById('wallThickness').value) || 0.1; }
-function getL() { return parseFloat(document.getElementById('L_total').value) || 14.5; }
-function getW() { return parseFloat(document.getElementById('W_total').value) || 11.0; }
-function round2(v) { return Math.round(v * 100) / 100; }
-
-// ===== PANEL HISOBLASH =====
-function calculatePanels() {
-    const panelWidth = getPanelWidth();
-    const cornerSize = getCornerSize();
-    const H = getH();
-
-    if (walls.length === 0) {
-        return { wallPanels:0, ceilingPanels:0, floorPanels:0, totalPanels:0, doorArea:0, doorCount:0, wallDetails:[], wallCount:0, specs:{}, cornerPanels:0, stdPanels:0, innerWallPanels:0, doorTopPanels:0 };
-    }
-
-    let totalWallPanels = 0, totalDoorArea = 0, doorCount = doors.length;
-    const doorMap = {};
-    doors.forEach(d => { if (!doorMap[d.wallId]) doorMap[d.wallId] = []; doorMap[d.wallId].push(d); });
-
-    let cornerPanelsTotal = 0, stdPanelsTotal = 0, innerWallPanels = 0, doorTopPanels = 0;
-    let wallDetails = [];
-
-    walls.forEach((w) => {
-        const len = wallLength(w);
-        const doorList = doorMap[w.id] || [];
-        const isInner = !!w.isInner;
-
-        let cornerCount = 2;
-        let mainLen = len - cornerSize * 2;
-        let stdCount = 0;
-        let doorArea = 0;
-
-        if (mainLen > 0) {
-            const rawCount = mainLen / panelWidth;
-            const remainder = mainLen % panelWidth;
-            if (remainder > 0.001 && remainder < 0.28) {
-                stdCount = Math.floor(rawCount);
-            } else {
-                stdCount = Math.ceil(rawCount);
+            // 3-qism: 2.6 ball
+            {
+                question: "Dastur natijasini toping:\na=(1, 2, 3, 4, 5)\na.pop(2)\nprint(a)",
+                options: ["(1, 2, 3)", "(3, 4, 5)", "(1, 2, 4, 5)", "AttributeError"],
+                correct: 2,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Dastur natijasini aniqlang:\ndef func():\n    try:\n        return True\n    finally:\n        return False\nprint(func())",
+                options: ["True", "True, False", "False", "False, True"],
+                correct: 2,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\na = 'informatika'\nfor i in range(len(a)):\n    a[i].upper()\nprint(a)",
+                options: ["INFORMATIKA", "INFORMATIa", "informatika", "iNFORMATIKA"],
+                correct: 2,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\nx = 'abcdef'\ni = 'a'\nwhile i in x:\n    x=x[:-1]\n    print(i, end=' ')",
+                options: ["aaaaa", "a a a a a a", "iiiii", "i i i i i"],
+                correct: 1,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\na = {1, 2, 3, 4}\nb = {5, 6, 7, 8}\nprint(len(a+b))",
+                options: ["8", "TypeError", "4", "AttributeError"],
+                correct: 1,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Natijani aniqlang: print(min(max(False, -3, -4), 2, 7))",
+                options: ["-4", "False", "2", "TypeError"],
+                correct: 2,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Natijani toping:\na = {1: 'A', 2: 'B', 3: 'C'}\nfor i, j in a.items():\n    print(i, j, end=' ')",
+                options: ["A B C", "1 A 2 B 3 C", "1 2 3", "1 2 3 A B C"],
+                correct: 1,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Dastur natijasini toping:\na = ['a', 'b', 'c', 'd', 'e']\nfor i in range(len(a)):\n    a[i] = chr(ord(a[i])+1)\nprint(a)",
+                options: ["['b', 'c', 'd', 'e', 'f']", "a b c d e f", "[ 'b', 'c', 'd', 'e', 'f']", "['a', 'b', 'c', 'd', 'e', 'f']"],
+                correct: 0,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "O'lchami 1366x768 bo'lgan ekranda 16 xil rang aks etadi. Ekrandagi axborot hajmini Kbayt da aniqlang.",
+                options: ["2049 Kbayt", "512.25 Kbayt", "1024.5 Kbayt", "4098 Kbayt"],
+                correct: 1,
+                points: "2.6 ball",
+                section: "3-qism"
+            },
+            {
+                question: "Musiqani yozish uchun maqbul sifat darajasini belgilang.",
+                options: ["192 kbps", "256 kbps", "320 kbps", "96 kbps"],
+                correct: 2,
+                points: "2.6 ball",
+                section: "3-qism"
             }
-        }
+        ];
 
-        doorList.forEach(d => {
-            doorArea += d.width * d.height;
-            const doorPanelCount = Math.ceil(d.width / panelWidth);
-            doorTopPanels += doorPanelCount;
-            stdCount = Math.max(0, stdCount - doorPanelCount);
-        });
+        let userAnswers = new Array(questions.length).fill(null);
+        let timeLeft = 90 * 60;
+        let timerInterval;
+        let quizSubmitted = false;
+        let shuffledQuestions = [];
+        let questionIndices = [];
 
-        const totalPanelsForWall = cornerCount + stdCount;
-
-        if (isInner) {
-            innerWallPanels += totalPanelsForWall;
-        } else {
-            cornerPanelsTotal += cornerCount;
-            stdPanelsTotal += stdCount;
-        }
-
-        totalWallPanels += totalPanelsForWall;
-        totalDoorArea += doorArea;
-
-        wallDetails.push({
-            id: w.id, length: len, panels: totalPanelsForWall,
-            cornerPanels: cornerCount, stdPanels: stdCount,
-            doors: doorList.length, doorArea: doorArea, isInner: isInner
-        });
-    });
-
-    const ceilPanels = Math.ceil(getW() / panelWidth);
-    const floorPanels = Math.ceil(getW() / panelWidth);
-
-    let totalPanels = totalWallPanels;
-    let roofPanels = 0, floorPanelsFinal = 0;
-
-    if (document.getElementById('roofChk').checked) { roofPanels = ceilPanels; totalPanels += roofPanels; }
-    if (document.getElementById('floorChk').checked) { floorPanelsFinal = floorPanels; totalPanels += floorPanelsFinal; }
-
-    const specs = {
-        'Burchak paneli': cornerPanelsTotal,
-        'Tashqi devor paneli': stdPanelsTotal,
-        'Ichki devor paneli': innerWallPanels,
-        'Eshik usti paneli': doorTopPanels,
-        'Tom paneli': roofPanels,
-        'Pol paneli': floorPanelsFinal,
-    };
-    specs['JAMI'] = totalPanels;
-
-    return {
-        wallPanels: totalWallPanels, ceilingPanels: roofPanels, floorPanels: floorPanelsFinal,
-        totalPanels: totalPanels, doorArea: totalDoorArea, doorCount: doorCount,
-        wallDetails: wallDetails, wallCount: walls.length, specs: specs,
-        cornerPanels: cornerPanelsTotal, stdPanels: stdPanelsTotal,
-        innerWallPanels: innerWallPanels, doorTopPanels: doorTopPanels
-    };
-}
-
-// ===== THREE.JS =====
-function wallLength(w) { return Math.hypot(w.x2 - w.x1, w.z2 - w.z1); }
-function wallAngle(w) { return Math.atan2(w.z2 - w.z1, w.x2 - w.x1); }
-function wallMidpoint(w) { return { x: (w.x1 + w.x2) / 2, z: (w.z1 + w.z2) / 2 }; }
-function pointAlongWall(w, t) { return { x: w.x1 + (w.x2 - w.x1) * t, z: w.z1 + (w.z2 - w.z1) * t }; }
-
-// ===== SCENE SETUP =====
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f4f8);
-
-const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(30, 18, 35);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.shadowMap.bias = 0.0001;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
-document.getElementById('canvas-wrap').appendChild(renderer.domElement);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(7, 1.5, 5);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.maxPolarAngle = Math.PI / 2.2;
-controls.update();
-
-// Lighting
-const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambient);
-
-const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
-mainLight.position.set(25, 35, 20);
-mainLight.castShadow = true;
-mainLight.shadow.mapSize.set(1024, 1024);
-mainLight.shadow.camera.left = -40;
-mainLight.shadow.camera.right = 40;
-mainLight.shadow.camera.top = 40;
-mainLight.shadow.camera.bottom = -40;
-mainLight.shadow.normalBias = 0.02;
-scene.add(mainLight);
-
-const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
-fillLight.position.set(-20, 10, -20);
-scene.add(fillLight);
-
-const rimLight = new THREE.DirectionalLight(0xffeedd, 0.2);
-rimLight.position.set(0, -10, 30);
-scene.add(rimLight);
-
-const gridHelper = new THREE.GridHelper(60, 60, 0x94a3b8, 0xcbd5e1);
-scene.add(gridHelper);
-
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85, metalness: 0.05 });
-let floorMesh = null, roofMesh = null;
-
-const groundGeo = new THREE.PlaneGeometry(200, 200);
-const groundMat = new THREE.MeshBasicMaterial({ visible: false });
-const groundPlane = new THREE.Mesh(groundGeo, groundMat);
-groundPlane.rotation.x = -Math.PI / 2;
-scene.add(groundPlane);
-
-const previewMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 2 });
-let previewLine = null;
-
-const wallMeshes = new Map();
-const doorMeshes = new Map();
-let draggableObjects = [];
-
-const wallMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5, metalness: 0.05 });
-const wallMatSelected = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3, metalness: 0.1 });
-const wallMatInner = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.6, metalness: 0.05 });
-const doorMat = new THREE.MeshStandardMaterial({ color: 0xe8eaed, roughness: 0.3, metalness: 0.15 });
-const frameMat = new THREE.MeshStandardMaterial({ color: 0x1c1f26, roughness: 0.3, metalness: 0.6 });
-const handleMat = new THREE.MeshStandardMaterial({ color: 0x2b2f38, roughness: 0.25, metalness: 0.8 });
-
-function syncWallDims() {
-    const H = getH(), T = getT();
-    walls.forEach(w => { w.height = H; w.thickness = T; });
-}
-
-// ===== REBUILD SCENE =====
-function rebuildScene() {
-    wallMeshes.forEach(m => scene.remove(m));
-    wallMeshes.clear();
-    doorMeshes.forEach(d => { scene.remove(d.group); scene.remove(d.proxy); });
-    doorMeshes.clear();
-    if (floorMesh) { scene.remove(floorMesh); floorMesh = null; }
-    if (roofMesh) { scene.remove(roofMesh); roofMesh = null; }
-    draggableObjects = [];
-
-    const H = getH();
-
-    if (document.getElementById('floorChk').checked && walls.length > 0) {
-        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-        walls.forEach(w => {
-            minX = Math.min(minX, w.x1, w.x2); maxX = Math.max(maxX, w.x1, w.x2);
-            minZ = Math.min(minZ, w.z1, w.z2); maxZ = Math.max(maxZ, w.z1, w.z2);
-        });
-        const fw = Math.max(0.1, maxX - minX), fd = Math.max(0.1, maxZ - minZ);
-        floorMesh = new THREE.Mesh(new THREE.BoxGeometry(fw, 0.05, fd), floorMat);
-        floorMesh.position.set((minX + maxX) / 2, -0.025, (minZ + maxZ) / 2);
-        floorMesh.receiveShadow = true;
-        scene.add(floorMesh);
-    }
-
-    walls.forEach((w) => {
-        const len = wallLength(w);
-        if (len < 0.01) return;
-        const isInner = !!w.isInner;
-        const mat = isInner ? wallMatInner : (w.id === selectedWallId ? wallMatSelected : wallMat.clone());
-        const geo = new THREE.BoxGeometry(len, H, w.thickness);
-        const mesh = new THREE.Mesh(geo, mat);
-        const mid = wallMidpoint(w);
-        mesh.position.set(mid.x, H / 2, mid.z);
-        mesh.rotation.y = -wallAngle(w);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.userData = { type: 'wall', id: w.id, isInner: isInner };
-        scene.add(mesh);
-        wallMeshes.set(w.id, mesh);
-        draggableObjects.push(mesh);
-    });
-
-    doors.forEach(d => {
-        const w = walls.find(ww => ww.id === d.wallId);
-        if (!w) return;
-        const pos = pointAlongWall(w, d.t);
-        const angle = -wallAngle(w);
-
-        const group = new THREE.Group();
-        group.position.set(pos.x, 0, pos.z);
-        group.rotation.y = angle;
-
-        const panelThickness = Math.max(0.06, w.thickness * 0.7);
-        const doorGeo = new THREE.BoxGeometry(d.width, d.height, panelThickness);
-        const doorMesh = new THREE.Mesh(doorGeo, doorMat);
-        doorMesh.position.set(0, d.height / 2, 0);
-        doorMesh.castShadow = true;
-        group.add(doorMesh);
-
-        const seamMat = new THREE.MeshStandardMaterial({ color: 0xd0d3d8, roughness: 0.4, metalness: 0.15 });
-        const seamInset = 0.06, seamThickness = 0.012;
-        const seamGeoV = new THREE.BoxGeometry(seamThickness, d.height - seamInset * 2, panelThickness + 0.01);
-        const seamLeft = new THREE.Mesh(seamGeoV, seamMat);
-        seamLeft.position.set(-d.width / 2 + seamInset, d.height / 2, 0);
-        group.add(seamLeft);
-        const seamRight = new THREE.Mesh(seamGeoV, seamMat);
-        seamRight.position.set(d.width / 2 - seamInset, d.height / 2, 0);
-        group.add(seamRight);
-
-        const fw = 0.07, frameDepth = panelThickness + 0.06;
-        const leftCol = new THREE.Mesh(new THREE.BoxGeometry(fw, d.height + fw, frameDepth), frameMat);
-        leftCol.position.set(-d.width / 2 - fw / 2, d.height / 2, 0);
-        group.add(leftCol);
-        const rightCol = new THREE.Mesh(new THREE.BoxGeometry(fw, d.height + fw, frameDepth), frameMat);
-        rightCol.position.set(d.width / 2 + fw / 2, d.height / 2, 0);
-        group.add(rightCol);
-        const topBeam = new THREE.Mesh(new THREE.BoxGeometry(d.width + fw * 2, fw, frameDepth), frameMat);
-        topBeam.position.set(0, d.height + fw / 2, 0);
-        group.add(topBeam);
-
-        const handleLen = Math.min(0.5, d.height * 0.22);
-        const handleBar = new THREE.Mesh(new THREE.BoxGeometry(0.035, handleLen, 0.05), handleMat);
-        handleBar.position.set(d.width / 2 - 0.12, d.height * 0.5, panelThickness / 2 + 0.03);
-        group.add(handleBar);
-        const handleMountTop = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.03, 0.04), handleMat);
-        handleMountTop.position.set(d.width / 2 - 0.12, d.height * 0.5 + handleLen / 2, panelThickness / 2 + 0.015);
-        group.add(handleMountTop);
-        const handleMountBottom = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.03, 0.04), handleMat);
-        handleMountBottom.position.set(d.width / 2 - 0.12, d.height * 0.5 - handleLen / 2, panelThickness / 2 + 0.015);
-        group.add(handleMountBottom);
-
-        group.userData = { type: 'door', id: d.id, wallId: d.wallId };
-        scene.add(group);
-
-        const proxyGeo = new THREE.BoxGeometry(d.width + fw * 2 + 0.05, d.height + fw + 0.05, frameDepth + 0.1);
-        const proxyMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
-        const proxy = new THREE.Mesh(proxyGeo, proxyMat);
-        proxy.position.set(pos.x, d.height / 2, pos.z);
-        proxy.rotation.y = angle;
-        proxy.castShadow = false;
-        proxy.receiveShadow = false;
-        proxy.userData = { type: 'door', id: d.id, wallId: d.wallId };
-        scene.add(proxy);
-
-        doorMeshes.set(d.id, { group, proxy, wallId: d.wallId });
-        draggableObjects.push(proxy);
-    });
-
-    if (document.getElementById('roofChk').checked && walls.length > 0) {
-        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-        walls.forEach(w => {
-            minX = Math.min(minX, w.x1, w.x2); maxX = Math.max(maxX, w.x1, w.x2);
-            minZ = Math.min(minZ, w.z1, w.z2); maxZ = Math.max(maxZ, w.z1, w.z2);
-        });
-        const fullL = Math.max(0.1, maxX - minX), fullW = Math.max(0.1, maxZ - minZ);
-        const roofMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6 });
-        roofMesh = new THREE.Mesh(new THREE.BoxGeometry(fullL + 0.3, 0.08, fullW + 0.3), roofMat);
-        roofMesh.position.set((minX + maxX) / 2, H + 0.04, (minZ + maxZ) / 2);
-        roofMesh.castShadow = true;
-        scene.add(roofMesh);
-    }
-
-    setupDragControls();
-    updateUI();
-    renderDrawings();
-    updateSpecs();
-    updateDimensionInfo();
-}
-
-let dragControls = null;
-function setupDragControls() {
-    if (dragControls) dragControls.dispose();
-    dragControls = new DragControls(draggableObjects, camera, renderer.domElement);
-    dragControls.enabled = !drawMode;
-
-    dragControls.addEventListener('dragstart', (e) => {
-        controls.enabled = false;
-        if (e.object.userData.type === 'wall') selectedWallId = e.object.userData.id;
-    });
-
-    dragControls.addEventListener('drag', (e) => {
-        const obj = e.object;
-        if (obj.userData.type === 'wall') {
-            const w = walls.find(ww => ww.id === obj.userData.id);
-            if (w) {
-                const len = wallLength(w), angle = wallAngle(w);
-                const newMidX = obj.position.x, newMidZ = obj.position.z;
-                w.x1 = round2(newMidX - Math.cos(angle) * len / 2);
-                w.z1 = round2(newMidZ - Math.sin(angle) * len / 2);
-                w.x2 = round2(newMidX + Math.cos(angle) * len / 2);
-                w.z2 = round2(newMidZ + Math.sin(angle) * len / 2);
-                obj.position.y = getH() / 2;
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-        } else if (obj.userData.type === 'door') {
-            const w = walls.find(ww => ww.id === obj.userData.wallId);
-            if (w) {
-                const dx = w.x2 - w.x1, dz = w.z2 - w.z1;
-                const len2 = dx * dx + dz * dz || 1;
-                let t = ((obj.position.x - w.x1) * dx + (obj.position.z - w.z1) * dz) / len2;
-                t = Math.max(0.02, Math.min(0.98, t));
-                const d = doors.find(dd => dd.id === obj.userData.id);
-                if (d) d.t = t;
-                const pos = pointAlongWall(w, t);
-                obj.position.set(pos.x, obj.position.y, pos.z);
-                const rec = doorMeshes.get(obj.userData.id);
-                if (rec) rec.group.position.set(pos.x, 0, pos.z);
+            return shuffled;
+        }
+
+        function initQuiz() {
+            questionIndices = Array.from({ length: questions.length }, (_, i) => i);
+            questionIndices = shuffleArray(questionIndices);
+            shuffledQuestions = questionIndices.map(i => ({ ...questions[i], originalIndex: i }));
+            userAnswers = new Array(questions.length).fill(null);
+            renderQuestions();
+            startTimer();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            shuffledQuestions.forEach((q, displayIndex) => {
+                const index = q.originalIndex;
+                const div = document.createElement('div');
+                div.className = 'question-container';
+                
+                div.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-number">Savol ${displayIndex + 1}/30</div>
+                        <span class="question-points">${q.points}</span>
+                    </div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options" id="options-${index}">
+                        ${q.options.map((option, optIndex) => `
+                            <label class="option" id="option-${index}-${optIndex}">
+                                <input type="radio" name="question-${index}" value="${optIndex}" 
+                                    onchange="selectAnswer(${index}, ${optIndex})" 
+                                    ${userAnswers[index] === optIndex ? 'checked' : ''}>
+                                <span>${String.fromCharCode(65 + optIndex)}) ${option}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            updateProgress();
+        }
+
+        function selectAnswer(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            updateProgress();
+
+            const optionLabel = document.getElementById(`option-${questionIndex}-${optionIndex}`);
+            const allOptions = document.querySelectorAll(`[id^="option-${questionIndex}-"]`);
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            optionLabel.classList.add('selected');
+        }
+
+        function updateProgress() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            const percentage = (answered / questions.length) * 100;
+
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('answered-counter').textContent = `Javoblar: ${answered}/30`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                const timerDisplay = document.getElementById('timer');
+
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 300) {
+                    timerDisplay.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            if (quizSubmitted) return;
+            quizSubmitted = true;
+
+            clearInterval(timerInterval);
+
+            const correct = userAnswers.filter((answer, index) => answer !== null && answer === questions[index].correct).length;
+            const percentage = Math.round((correct / questions.length) * 100);
+
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.textContent = percentage + '%';
+
+            if (percentage >= 80) {
+                scoreDisplay.classList.add('high');
+            } else if (percentage < 50) {
+                scoreDisplay.classList.add('low');
             }
+
+            const messagesMap = {
+                100: "Ajoyib! Siz barcha savollarga to'g'ri javob berdingiz!",
+                90: "Juda yaxshi natija! Siz 90% dan ortiq o'zingiz bilan!",
+                80: "Yaxshi! Siz 80% yuqori natija oldinggiz.",
+                70: "O'rta darajali natija. O'z bilimingizni ko'paytiring.",
+                50: "Natija o'rta. Ko'proq o'zini tekshiring.",
+                0: "Iloji bor qayta ko'paytirish. Bilimni o'rganing va qayta urinib ko'ring."
+            };
+
+            const message = Object.keys(messagesMap)
+                .sort((a, b) => b - a)
+                .find(score => percentage >= parseInt(score));
+
+            document.getElementById('results-message').textContent = messagesMap[message];
+            document.getElementById('results-details').innerHTML = `
+                <strong>To'g'ri javoblar:</strong> ${correct}/30<br>
+                <strong>Noto'g'ri javoblar:</strong> ${30 - correct}/30<br>
+                <strong>Javob bermaganlar:</strong> ${userAnswers.filter(a => a === null).length}/30
+            `;
+
+            document.getElementById('questions-container').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+            document.getElementById('submit-btn').style.display = 'none';
         }
-    });
 
-    dragControls.addEventListener('dragend', () => {
-        controls.enabled = true;
-        saveState();
-        updateUI();
-        syncFormFromSelection();
-        renderDrawings();
-        updateSpecs();
-    });
-}
+        function resetQuiz() {
+            userAnswers = new Array(questions.length).fill(null);
+            quizSubmitted = false;
+            timeLeft = 90 * 60;
 
-const raycaster = new THREE.Raycaster();
-const mouseNDC = new THREE.Vector2();
+            document.getElementById('questions-container').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('timer').classList.remove('warning');
 
-let drawMode = false;
-let drawStage = 0;
-let drawFirstPoint = null;
-
-function getGroundPoint(event) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouseNDC.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseNDC.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(mouseNDC, camera);
-    const hits = raycaster.intersectObject(groundPlane);
-    if (hits.length > 0) return { x: hits[0].point.x, z: hits[0].point.z };
-    return null;
-}
-
-// ===== SNAP FUNKSIYASI - FAQAT DEVOR OXIRLARIGA =====
-function snapPoint(x, z) {
-    if (!snapEnabled) return { x, z };
-    
-    let minDist = snapDistance;
-    let snapped = { x, z };
-    let found = false;
-    
-    // Faqat devor oxirlariga (A va B nuqtalar) snap qilamiz
-    walls.forEach(w => {
-        // A nuqta (x1, z1)
-        const distA = Math.hypot(x - w.x1, z - w.z1);
-        if (distA < minDist) {
-            minDist = distA;
-            snapped = { x: w.x1, z: w.z1 };
-            found = true;
+            renderQuestions();
+            startTimer();
         }
-        // B nuqta (x2, z2)
-        const distB = Math.hypot(x - w.x2, z - w.z2);
-        if (distB < minDist) {
-            minDist = distB;
-            snapped = { x: w.x2, z: w.z2 };
-            found = true;
-        }
-    });
-    
-    return snapped;
-}
 
-// Snap indikatori uchun qizil nuqta
-const snapIndicatorMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-let snapIndicatorMesh = null;
-
-function showSnapIndicator(position) {
-    if (snapIndicatorMesh) {
-        scene.remove(snapIndicatorMesh);
-        snapIndicatorMesh = null;
-    }
-    if (!position || !snapEnabled) return;
-    const geo = new THREE.SphereGeometry(0.15, 8, 8);
-    snapIndicatorMesh = new THREE.Mesh(geo, snapIndicatorMat);
-    snapIndicatorMesh.position.set(position.x, 0.05, position.z);
-    scene.add(snapIndicatorMesh);
-}
-
-renderer.domElement.addEventListener('click', (event) => {
-    if (!drawMode) return;
-    const p = getGroundPoint(event);
-    if (!p) return;
-    const snapped = snapPoint(p.x, p.z);
-    if (drawStage === 0) {
-        drawFirstPoint = snapped;
-        drawStage = 1;
-        document.getElementById('modehint').innerHTML = '<i class="fa-solid fa-pen"></i> Tugash nuqtasini bosing (B nuqta)';
-        // Snap indikatorini tozalash
-        showSnapIndicator(null);
-    } else {
-        addWall(drawFirstPoint.x, drawFirstPoint.z, snapped.x, snapped.z);
-        drawStage = 0;
-        drawFirstPoint = null;
-        if (previewLine) { scene.remove(previewLine); previewLine = null; }
-        document.getElementById('modehint').innerHTML = '<i class="fa-solid fa-pen"></i> Boshlanish nuqtasini bosing (A nuqta)';
-        showSnapIndicator(null);
-        saveState();
-    }
-});
-
-renderer.domElement.addEventListener('mousemove', (event) => {
-    if (!drawMode || drawStage !== 1 || !drawFirstPoint) {
-        showSnapIndicator(null);
-        return;
-    }
-    const p = getGroundPoint(event);
-    if (!p) return;
-    const snapped = snapPoint(p.x, p.z);
-    
-    // Snap indikatorini ko'rsatish (agar snap qilingan bo'lsa)
-    const isSnapped = (snapped.x !== p.x || snapped.z !== p.z);
-    if (isSnapped && snapEnabled) {
-        showSnapIndicator(snapped);
-    } else {
-        showSnapIndicator(null);
-    }
-    
-    if (previewLine) scene.remove(previewLine);
-    const geo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(drawFirstPoint.x, 0.05, drawFirstPoint.z),
-        new THREE.Vector3(snapped.x, 0.05, snapped.z)
-    ]);
-    previewLine = new THREE.Line(geo, previewMat);
-    scene.add(previewLine);
-});
-
-// ===== KEYBOARD SHORTCUTS =====
-window.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape' && drawMode) {
-        drawMode = false;
-        drawStage = 0;
-        drawFirstPoint = null;
-        if (previewLine) { scene.remove(previewLine); previewLine = null; }
-        showSnapIndicator(null);
-        document.getElementById('modehint').style.display = 'none';
-        document.getElementById('drawWallBtn').innerHTML = '<i class="fa-solid fa-pen"></i> Devor chizish';
-        document.getElementById('drawWallBtn').className = 'secondary';
-        if (dragControls) dragControls.enabled = true;
-        controls.enabled = true;
-        return;
-    }
-
-    if (evt.ctrlKey && evt.key === 'z') { evt.preventDefault(); undo(); return; }
-    if (evt.ctrlKey && evt.key === 'y') { evt.preventDefault(); redo(); return; }
-
-    if (evt.ctrlKey && evt.key === 'c') {
-        evt.preventDefault();
-        if (selectedWallId !== null) {
-            const w = walls.find(ww => ww.id === selectedWallId);
-            if (w) {
-                clipboardWall = { ...w };
-                console.log('Devor nusxalandi:', clipboardWall);
-                document.getElementById('panelInfo').innerHTML = '<i class="fa-regular fa-copy"></i> Nusxalangan: Devor #' + w.id;
-            }
-        }
-        return;
-    }
-
-    if (evt.ctrlKey && evt.key === 'v') {
-        evt.preventDefault();
-        if (clipboardWall) {
-            const offsetX = 0.5, offsetZ = 0.5;
-            addWall(
-                clipboardWall.x1 + offsetX,
-                clipboardWall.z1 + offsetZ,
-                clipboardWall.x2 + offsetX,
-                clipboardWall.z2 + offsetZ,
-                clipboardWall.isInner || false
-            );
-            saveState();
-            console.log('Devor joylashtirildi');
-            document.getElementById('panelInfo').innerHTML = '<i class="fa-solid fa-check"></i> Devor joylashtirildi';
-        } else {
-            alert('Avval devorni nusxalang (CTRL+C)');
-        }
-        return;
-    }
-
-    if (evt.ctrlKey && evt.key === 'd') {
-        evt.preventDefault();
-        if (selectedWallId !== null) {
-            const w = walls.find(ww => ww.id === selectedWallId);
-            if (w) {
-                const offsetX = 0.8, offsetZ = 0.8;
-                addWall(
-                    w.x1 + offsetX,
-                    w.z1 + offsetZ,
-                    w.x2 + offsetX,
-                    w.z2 + offsetZ,
-                    w.isInner || false
-                );
-                saveState();
-                console.log('Devor dublikatlandi');
-                document.getElementById('panelInfo').innerHTML = '<i class="fa-solid fa-check"></i> Devor dublikatlandi';
-            }
-        } else {
-            alert('Avval devorni tanlang');
-        }
-        return;
-    }
-
-    if (evt.ctrlKey && evt.key === 'x') {
-        evt.preventDefault();
-        if (selectedWallId !== null) {
-            const w = walls.find(ww => ww.id === selectedWallId);
-            if (w) {
-                clipboardWall = { ...w };
-                console.log('Devor kesildi:', clipboardWall);
-                removeWallById(selectedWallId);
-                saveState();
-                document.getElementById('panelInfo').innerHTML = '<i class="fa-solid fa-scissors"></i> Kesildi: Devor #' + w.id;
-            }
-        } else {
-            alert('Avval devorni tanlang');
-        }
-        return;
-    }
-
-    if ((evt.key === 'Delete' || evt.key === 'Del') && selectedWallId !== null) {
-        removeWallById(selectedWallId);
-        saveState();
-        document.getElementById('panelInfo').innerHTML = '<i class="fa-solid fa-trash"></i> Devor o\'chirildi';
-    }
-});
-
-document.getElementById('drawWallBtn').addEventListener('click', () => {
-    drawMode = !drawMode;
-    drawStage = 0;
-    drawFirstPoint = null;
-    if (previewLine) { scene.remove(previewLine); previewLine = null; }
-    showSnapIndicator(null);
-    document.getElementById('modehint').style.display = drawMode ? 'flex' : 'none';
-    document.getElementById('drawWallBtn').innerHTML = drawMode ? '<i class="fa-solid fa-xmark"></i> Chizishni bekor' : '<i class="fa-solid fa-pen"></i> Devor chizish';
-    document.getElementById('drawWallBtn').className = drawMode ? 'danger' : 'secondary';
-    if (dragControls) dragControls.enabled = !drawMode;
-    controls.enabled = true;
-});
-
-function addWall(x1, z1, x2, z2, isInner = false) {
-    if (Math.hypot(x2 - x1, z2 - z1) < 0.05) return;
-    walls.push({
-        id: wallCounter++,
-        x1: round2(x1), z1: round2(z1), x2: round2(x2), z2: round2(z2),
-        thickness: getT(), height: getH(), isInner: isInner
-    });
-    rebuildScene();
-}
-
-function addDoor() {
-    const wallId = parseInt(document.getElementById('doorWallSelect').value);
-    if (isNaN(wallId)) { alert('Avval devor tanlang!'); return; }
-    const w = walls.find(ww => ww.id === wallId);
-    if (!w) return;
-
-    const width = parseFloat(document.getElementById('doorW').value) || 0.96;
-    const height = parseFloat(document.getElementById('doorH').value) || 2.0;
-    const t = parseFloat(document.getElementById('doorOffset').value) / 100;
-    const len = wallLength(w);
-
-    if (width >= len) {
-        alert('Eshik kengligi (' + width + 'm) devor uzunligidan (' + len.toFixed(2) + 'm) katta!');
-        return;
-    }
-    const H = w.height || getH();
-    if (height >= H) {
-        alert('Eshik balandligi (' + height + 'm) devor balandligidan (' + H.toFixed(2) + 'm) katta yoki teng!');
-        return;
-    }
-
-    const margin = Math.min(0.45, (width / 2 + 0.05) / len);
-    const clampedT = Math.max(margin, Math.min(1 - margin, t));
-
-    doors.push({ id: doorCounter++, wallId, t: clampedT, width, height });
-    rebuildScene();
-    saveState();
-}
-
-function addMultipleDoors(count = 3) {
-    const wallId = parseInt(document.getElementById('doorWallSelect').value);
-    if (isNaN(wallId)) { alert('Avval devor tanlang!'); return; }
-    const w = walls.find(ww => ww.id === wallId);
-    if (!w) return;
-
-    const width = parseFloat(document.getElementById('doorW').value) || 0.96;
-    const height = parseFloat(document.getElementById('doorH').value) || 2.0;
-    const len = wallLength(w);
-    const H = w.height || getH();
-
-    if (width >= len) {
-        alert('Eshik kengligi (' + width + 'm) devor uzunligidan (' + len.toFixed(2) + 'm) katta!');
-        return;
-    }
-    if (height >= H) {
-        alert('Eshik balandligi (' + height + 'm) devor balandligidan (' + H.toFixed(2) + 'm) katta yoki teng!');
-        return;
-    }
-
-    const totalWidth = width * count;
-    if (totalWidth > len * 0.85) {
-        alert(count + ' ta eshik devorga sig\'maydi!');
-        return;
-    }
-
-    const margin = (len - totalWidth) / (count + 1);
-    for (let i = 0; i < count; i++) {
-        const t = (margin + i * (width + margin)) / len;
-        doors.push({ id: doorCounter++, wallId, t: Math.min(0.98, Math.max(0.02, t)), width, height });
-    }
-    rebuildScene();
-    saveState();
-}
-
-function removeLastWall() {
-    if (walls.length === 0) return;
-    const last = walls[walls.length - 1];
-    doors = doors.filter(d => d.wallId !== last.id);
-    walls.pop();
-    if (selectedWallId === last.id) selectedWallId = null;
-    rebuildScene();
-    saveState();
-}
-function removeLastDoor() { 
-    doors.pop(); 
-    rebuildScene(); 
-    saveState();
-}
-function removeWallById(id) {
-    walls = walls.filter(w => w.id !== id);
-    doors = doors.filter(d => d.wallId !== id);
-    if (selectedWallId === id) selectedWallId = null;
-    rebuildScene();
-}
-function removeDoorById(id) { doors = doors.filter(d => d.id !== id); rebuildScene(); }
-function clearAll() {
-    walls = []; doors = []; wallCounter = 0; doorCounter = 0; selectedWallId = null; clipboardWall = null;
-    rebuildScene();
-    saveState();
-}
-
-// ===== UI =====
-function updateUI() {
-    document.getElementById('stats').innerHTML = '<i class="fa-solid fa-block-brick"></i> Devor: ' + walls.length + ' | <i class="fa-solid fa-door-closed"></i> Eshik: ' + doors.length + ' | <i class="fa-solid fa-link' + (snapEnabled ? '' : '-slash') + '"></i> Snap';
-
-    const sel = document.getElementById('doorWallSelect');
-    const prevVal = sel.value;
-    sel.innerHTML = '<option value="">— devor tanlang —</option>';
-    walls.forEach(w => {
-        const opt = document.createElement('option');
-        opt.value = w.id;
-        opt.textContent = 'Devor #' + w.id + ' (' + wallLength(w).toFixed(2) + 'm)';
-        sel.appendChild(opt);
-    });
-    if ([...sel.options].some(o => o.value === prevVal)) sel.value = prevVal;
-
-    const wl = document.getElementById('wallList');
-    wl.innerHTML = '';
-    walls.forEach((w) => {
-        const row = document.createElement('div');
-        row.className = 'item-row' + (w.id === selectedWallId ? ' selected' : '');
-        const panelWidth = getPanelWidth();
-        const panelCount = Math.max(1, Math.ceil(wallLength(w) / panelWidth));
-        const isInner = !!w.isInner;
-        const len = wallLength(w);
-        const icon = isInner ? 'fa-house' : 'fa-building-shield';
-        row.innerHTML = '<span><i class="fa-solid ' + icon + '"></i> #' + w.id + ' ' + len.toFixed(2) + 'm — ' + panelCount + ' panel</span>';
-        row.querySelector('span').addEventListener('click', () => { 
-            selectedWallId = w.id; 
-            rebuildScene();
-            syncFormFromSelection();
-        });
-        const del = document.createElement('button');
-        del.className = 'item-del'; del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        del.addEventListener('click', (e) => { e.stopPropagation(); removeWallById(w.id); saveState(); });
-        row.appendChild(del);
-        wl.appendChild(row);
-    });
-
-    const dl = document.getElementById('doorList');
-    dl.innerHTML = '';
-    doors.forEach(d => {
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = '<span><i class="fa-solid fa-door-closed"></i> #' + d.id + ' — devor #' + d.wallId + ', ' + d.width.toFixed(2) + 'x' + d.height.toFixed(2) + 'm</span>';
-        const del = document.createElement('button');
-        del.className = 'item-del'; del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        del.addEventListener('click', () => { removeDoorById(d.id); saveState(); });
-        row.appendChild(del);
-        dl.appendChild(row);
-    });
-
-    document.getElementById('panelInfo').textContent = selectedWallId !== null
-        ? 'Tanlangan: Devor #' + selectedWallId : 'Tanlangan: yoq';
-
-    const data = calculatePanels();
-    document.getElementById('totalPanelsDisplay').textContent = data.totalPanels;
-    document.getElementById('panelDetail').textContent =
-        'Devor: ' + data.wallPanels + ' | Tom: ' + data.ceilingPanels + ' | Pol: ' + data.floorPanels;
-    document.getElementById('doorDetail').textContent =
-        'Eshiklar: ' + data.doorCount + ' ta (maydoni: ' + data.doorArea.toFixed(2) + ' m²)';
-    document.getElementById('panelTotal').innerHTML = '<i class="fa-solid fa-layer-group"></i> Panellar: ' + data.totalPanels;
-}
-
-function updateDimensionInfo() {
-    if (walls.length === 0) {
-        document.getElementById('dimensionInfo').textContent = 'L:0 W:0 H:0';
-        return;
-    }
-    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-    walls.forEach(w => {
-        minX = Math.min(minX, w.x1, w.x2);
-        maxX = Math.max(maxX, w.x1, w.x2);
-        minZ = Math.min(minZ, w.z1, w.z2);
-        maxZ = Math.max(maxZ, w.z1, w.z2);
-    });
-    const L = round2(maxX - minX);
-    const W = round2(maxZ - minZ);
-    const H = getH();
-    document.getElementById('dimensionInfo').textContent = 'L:' + L + ' W:' + W + ' H:' + H;
-}
-
-function syncFormFromSelection() {
-    if (selectedWallId === null) {
-        document.getElementById('editX1').value = '';
-        document.getElementById('editZ1').value = '';
-        document.getElementById('editX2').value = '';
-        document.getElementById('editZ2').value = '';
-        return;
-    }
-    const w = walls.find(ww => ww.id === selectedWallId);
-    if (!w) return;
-    document.getElementById('editX1').value = w.x1;
-    document.getElementById('editZ1').value = w.z1;
-    document.getElementById('editX2').value = w.x2;
-    document.getElementById('editZ2').value = w.z2;
-    document.getElementById('wx1').value = w.x1;
-    document.getElementById('wz1').value = w.z1;
-    document.getElementById('wx2').value = w.x2;
-    document.getElementById('wz2').value = w.z2;
-}
-
-// ===== SPEKS =====
-function updateSpecs() {
-    const data = calculatePanels();
-    const specs = data.specs || {};
-    const content = document.getElementById('specsContent');
-    if (!content) return;
-
-    let html = '<table><thead><tr><th>Panel turi</th><th>Soni</th></tr></thead><tbody>';
-    const keys = ['Burchak paneli', 'Tashqi devor paneli', 'Ichki devor paneli', 'Eshik usti paneli', 'Tom paneli', 'Pol paneli'];
-    let total = 0;
-    keys.forEach(k => {
-        const val = specs[k] || 0;
-        total += val;
-        html += '<tr><td>' + k + '</td><td style="text-align:right;">' + val + '</td></tr>';
-    });
-    const realPanelWidth = getPanelWidth();
-    const realHeight = getH();
-    const totalArea = total * realPanelWidth * realHeight;
-    html += '<tr class="total-row"><td>JAMI</td><td style="text-align:right;">' + total + '</td></tr>';
-    html += '<tr><td colspan="2" style="border:none;padding-top:6px;font-size:11px;color:#64748b;">';
-    html += 'Umumiy maydon: ~' + totalArea.toFixed(1) + ' m²<br>';
-    html += 'Panel olchami: ' + (realPanelWidth * 1000).toFixed(0) + 'x' + (realHeight * 1000).toFixed(0) + ' mm';
-    html += '</td></tr>';
-    html += '</tbody></table>';
-    content.innerHTML = html;
-}
-
-// ============================================================
-// ===== CHIZMALAR =====
-// ============================================================
-function renderDrawings() {
-    const container = document.getElementById('wallDrawingsContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    if (walls.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:30px;">Hali devor qoshilmagan</div>';
-        return;
-    }
-
-    // 1. UMUMIY LOYIHA KO'RINISHI
-    const overviewCard = buildOverviewDrawing();
-    container.appendChild(overviewCard);
-
-    // 2. HAR BIR DEVOR UCHUN CHIZMA
-    walls.forEach((w) => {
-        const card = buildDrawingCard(w);
-        container.appendChild(card);
-    });
-}
-
-function buildOverviewDrawing() {
-    const card = document.createElement('div');
-    card.className = 'overview-card';
-
-    const title = document.createElement('div');
-    title.className = 'ov-title';
-    const totalPanels = calculatePanels().totalPanels;
-    title.innerHTML = `
-        <span><i class="fa-solid fa-trowel-bricks"></i> UMUMIY LOYIHA KO'RINISHI</span>
-        <span>${walls.length} ta devor | ${doors.length} ta eshik | ${totalPanels} panel</span>
-    `;
-    card.appendChild(title);
-
-    const wrap = document.createElement('div');
-    wrap.className = 'ov-svg-wrap';
-    wrap.innerHTML = buildOverviewSVG();
-    card.appendChild(wrap);
-
-    return card;
-}
-
-function buildOverviewSVG() {
-    const W = 700, H = 400;
-    const pad = 30;
-    const mainW = W - pad * 2;
-    const mainH = H - pad * 2;
-
-    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-    walls.forEach(w => {
-        minX = Math.min(minX, w.x1, w.x2);
-        maxX = Math.max(maxX, w.x1, w.x2);
-        minZ = Math.min(minZ, w.z1, w.z2);
-        maxZ = Math.max(maxZ, w.z1, w.z2);
-    });
-    const bW = Math.max(0.5, maxX - minX);
-    const bH = Math.max(0.5, maxZ - minZ);
-    const scale = Math.min((mainW * 0.38) / bW, (mainH * 0.45) / bH, 65);
-
-    let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
-    svg += '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>';
-    svg += '<style>.label{font-family:"Segoe UI",Arial,sans-serif;font-size:10px;font-weight:600;}.dim{font-family:"Segoe UI",Arial,sans-serif;font-size:8px;fill:#64748b;}.title{font-family:"Segoe UI",Arial,sans-serif;font-size:11px;font-weight:700;fill:#0f172a;}</style>';
-
-    // REJA
-    const rejaX = pad, rejaY = pad;
-    const rejaW = mainW * 0.38, rejaH = mainH * 0.46;
-    svg += '<rect x="' + rejaX + '" y="' + rejaY + '" width="' + rejaW + '" height="' + rejaH + '" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>';
-    svg += '<text x="' + (rejaX + 6) + '" y="' + (rejaY + 14) + '" class="title">REJA (yuqoridan)</text>';
-
-    const rScale = Math.min((rejaW - 30) / bW, (rejaH - 30) / bH);
-    const rOffX = (rejaW - bW * rScale) / 2;
-    const rOffY = (rejaH - bH * rScale) / 2;
-
-    walls.forEach((w) => {
-        const x1 = rejaX + rOffX + (w.x1 - minX) * rScale;
-        const z1 = rejaY + rOffY + (w.z1 - minZ) * rScale;
-        const x2 = rejaX + rOffX + (w.x2 - minX) * rScale;
-        const z2 = rejaY + rOffY + (w.z2 - minZ) * rScale;
-        const isInner = w.isInner || false;
-        const color = isInner ? '#94a3b8' : '#3b82f6';
-        const strokeWidth = isInner ? 2.5 : 4;
-        svg += '<line x1="' + x1 + '" y1="' + z1 + '" x2="' + x2 + '" y2="' + z2 + '" stroke="' + color + '" stroke-width="' + strokeWidth + '" stroke-linecap="round"/>';
-        const mx = (x1 + x2) / 2, mz = (z1 + z2) / 2;
-        svg += '<text x="' + mx + '" y="' + (mz - 5) + '" font-size="6" fill="#1e293b" text-anchor="middle" font-weight="600">#' + w.id + '</text>';
-    });
-
-    doors.forEach(d => {
-        const w = walls.find(ww => ww.id === d.wallId);
-        if (!w) return;
-        const pos = pointAlongWall(w, d.t);
-        const x = rejaX + rOffX + (pos.x - minX) * rScale;
-        const z = rejaY + rOffY + (pos.z - minZ) * rScale;
-        svg += '<circle cx="' + x + '" cy="' + z + '" r="4" fill="#dc2626" stroke="#fff" stroke-width="1.5"/>';
-        svg += '<text x="' + x + '" y="' + (z - 6) + '" font-size="5" fill="#dc2626" text-anchor="middle">D' + d.id + '</text>';
-    });
-
-    svg += '<text x="' + (rejaX + rOffX + bW * rScale / 2) + '" y="' + (rejaY + rejaH - 4) + '" class="dim" text-anchor="middle">' + bW.toFixed(1) + ' m</text>';
-    svg += '<text x="' + (rejaX + 4) + '" y="' + (rejaY + rOffY + bH * rScale / 2) + '" class="dim" text-anchor="middle" transform="rotate(-90 ' + (rejaX + 4) + ' ' + (rejaY + rOffY + bH * rScale / 2) + ')">' + bH.toFixed(1) + ' m</text>';
-
-    // FASAD
-    const fasX = rejaX + rejaW + 12, fasY = pad;
-    const fasW = mainW * 0.42, fasH = mainH * 0.46;
-    svg += '<rect x="' + fasX + '" y="' + fasY + '" width="' + fasW + '" height="' + fasH + '" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>';
-    svg += '<text x="' + (fasX + 6) + '" y="' + (fasY + 14) + '" class="title">FASAD (old tom)</text>';
-
-    const fScale = Math.min((fasW - 30) / bW, (fasH - 40) / 3.8);
-    const fOffX = (fasW - bW * fScale) / 2;
-    const fBaseY = fasY + fasH - 12;
-
-    svg += '<rect x="' + (fasX + fOffX) + '" y="' + (fBaseY - 3.4 * fScale) + '" width="' + (bW * fScale) + '" height="' + (3.4 * fScale) + '" fill="none" stroke="#334155" stroke-width="1.5"/>';
-    svg += '<rect x="' + (fasX + fOffX - 4) + '" y="' + (fBaseY - 3.6 * fScale) + '" width="' + (bW * fScale + 8) + '" height="' + (0.3 * fScale) + '" fill="#e2e8f0" stroke="#334155" stroke-width="1"/>';
-
-    const frontDoors = doors.filter(d => {
-        const w = walls.find(ww => ww.id === d.wallId);
-        return w && !w.isInner && walls.indexOf(w) < 4;
-    });
-    frontDoors.forEach(d => {
-        const w = walls.find(ww => ww.id === d.wallId);
-        if (!w) return;
-        const pos = pointAlongWall(w, d.t);
-        const dx = ((pos.x - minX) / bW) * bW * fScale;
-        const dw = Math.min(d.width * fScale, bW * fScale * 0.3);
-        const dh = Math.min(d.height * fScale, 3.0 * fScale);
-        const cx = fasX + fOffX + dx;
-        const by = fBaseY;
-        svg += '<rect x="' + (cx - dw/2) + '" y="' + (by - dh) + '" width="' + dw + '" height="' + dh + '" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>';
-        svg += '<text x="' + cx + '" y="' + (by - dh - 3) + '" font-size="5" fill="#92400e" text-anchor="middle">D' + d.id + '</text>';
-    });
-
-    svg += '<text x="' + (fasX + fOffX + bW * fScale / 2) + '" y="' + (fBaseY + 14) + '" class="dim" text-anchor="middle">' + bW.toFixed(1) + ' m</text>';
-    svg += '<text x="' + (fasX + 3) + '" y="' + (fBaseY - 1.7 * fScale) + '" class="dim" text-anchor="middle" transform="rotate(-90 ' + (fasX + 3) + ' ' + (fBaseY - 1.7 * fScale) + ')">' + getH().toFixed(1) + ' m</text>';
-
-    // 3D
-    const axX = pad, axY = pad + rejaH + 10;
-    const axW = mainW * 0.42, axH = mainH * 0.42;
-    svg += '<rect x="' + axX + '" y="' + axY + '" width="' + axW + '" height="' + axH + '" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>';
-    svg += '<text x="' + (axX + 6) + '" y="' + (axY + 14) + '" class="title">3D KO\'RINISH</text>';
-
-    const aScale = Math.min((axW - 40) / (bW + bH), (axH - 50) / 4, 22);
-    const aCX = axX + axW / 2 + 10, aCY = axY + axH / 2 + 8;
-    const lx = bW * aScale / 2, ly = bH * aScale / 2, lz = getH() * aScale * 0.6;
-    const angle = 0.35;
-
-    const p1 = { x: aCX - lx * Math.cos(angle), y: aCY + lx * Math.sin(angle) };
-    const p2 = { x: aCX + lx * Math.cos(angle), y: aCY - lx * Math.sin(angle) };
-    const p3 = { x: aCX + lx * Math.cos(angle) + ly * Math.cos(angle), y: aCY - lx * Math.sin(angle) + ly * Math.sin(angle) };
-    const p4 = { x: aCX - lx * Math.cos(angle) + ly * Math.cos(angle), y: aCY + lx * Math.sin(angle) + ly * Math.sin(angle) };
-    const p1t = { x: p1.x, y: p1.y - lz };
-    const p2t = { x: p2.x, y: p2.y - lz };
-    const p3t = { x: p3.x, y: p3.y - lz };
-    const p4t = { x: p4.x, y: p4.y - lz };
-
-    svg += '<polygon points="' + p1t.x + ',' + p1t.y + ' ' + p2t.x + ',' + p2t.y + ' ' + p3t.x + ',' + p3t.y + ' ' + p4t.x + ',' + p4t.y + '" fill="#e2e8f0" stroke="#64748b" stroke-width="1.2"/>';
-    svg += '<polygon points="' + p1.x + ',' + p1.y + ' ' + p2.x + ',' + p2.y + ' ' + p2t.x + ',' + p2t.y + ' ' + p1t.x + ',' + p1t.y + '" fill="#bfdbfe" stroke="#64748b" stroke-width="1.2"/>';
-    svg += '<polygon points="' + p2.x + ',' + p2.y + ' ' + p3.x + ',' + p3.y + ' ' + p3t.x + ',' + p3t.y + ' ' + p2t.x + ',' + p2t.y + '" fill="#93c5fd" stroke="#64748b" stroke-width="1.2"/>';
-    svg += '<polygon points="' + p3.x + ',' + p3.y + ' ' + p4.x + ',' + p4.y + ' ' + p4t.x + ',' + p4t.y + ' ' + p3t.x + ',' + p3t.y + '" fill="#e2e8f0" stroke="#64748b" stroke-width="1.2"/>';
-    svg += '<polygon points="' + p1.x + ',' + p1.y + ' ' + p2.x + ',' + p2.y + ' ' + p3.x + ',' + p3.y + ' ' + p4.x + ',' + p4.y + '" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2"/>';
-
-    const labels3d = [
-        { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 - lz / 2, text: '0' },
-        { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 - lz / 2, text: '1' },
-        { x: (p3.x + p4.x) / 2, y: (p3.y + p4.y) / 2 - lz / 2, text: '2' },
-        { x: (p4.x + p1.x) / 2, y: (p4.y + p1.y) / 2 - lz / 2, text: '3' }
-    ];
-    labels3d.forEach(l => {
-        svg += '<text x="' + l.x + '" y="' + l.y + '" font-size="7" fill="#1e293b" text-anchor="middle" font-weight="700">#' + l.text + '</text>';
-    });
-
-    svg += '<text x="' + ((p1.x + p2.x) / 2) + '" y="' + (Math.max(p1.y, p2.y) + 14) + '" class="dim" text-anchor="middle">' + bW.toFixed(1) + ' m</text>';
-    svg += '<text x="' + ((p2.x + p3.x) / 2 + 12) + '" y="' + ((p2.y + p3.y) / 2) + '" class="dim">' + bH.toFixed(1) + ' m</text>';
-    svg += '<text x="' + (p1.x - 14) + '" y="' + ((p1.y + p1t.y) / 2) + '" class="dim" text-anchor="middle" transform="rotate(-90 ' + (p1.x - 14) + ' ' + ((p1.y + p1t.y) / 2) + ')">' + getH().toFixed(1) + ' m</text>';
-
-    // LEGENDA
-    const legX = axX + axW + 10, legY = axY + 5;
-    const legW = W - legX - 10;
-    svg += '<rect x="' + legX + '" y="' + legY + '" width="' + legW + '" height="' + (axH - 10) + '" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>';
-    svg += '<text x="' + (legX + 6) + '" y="' + (legY + 14) + '" class="title">LEGENDA</text>';
-
-    const legendItems = [
-        { color: '#3b82f6', label: 'Tashqi devor' },
-        { color: '#94a3b8', label: 'Ichki devor' },
-        { color: '#dc2626', label: 'Eshik' },
-        { color: '#fef3c7', label: 'Eshik joyi' },
-        { color: '#e2e8f0', label: 'Tom (yassi)' },
-    ];
-    legendItems.forEach((item, i) => {
-        const y = legY + 26 + i * 16;
-        svg += '<rect x="' + (legX + 8) + '" y="' + y + '" width="12" height="12" fill="' + item.color + '" rx="2" stroke="#cbd5e1" stroke-width="0.5"/>';
-        svg += '<text x="' + (legX + 25) + '" y="' + (y + 9) + '" font-size="8" fill="#1e293b">' + item.label + '</text>';
-    });
-
-    const data = calculatePanels();
-    const infoY = legY + 26 + legendItems.length * 16 + 8;
-    svg += '<text x="' + (legX + 8) + '" y="' + infoY + '" font-size="9" fill="#0f172a" font-weight="600">STATISTIKA</text>';
-    svg += '<text x="' + (legX + 8) + '" y="' + (infoY + 16) + '" font-size="8" fill="#475569">Eshiklar: ' + doors.length + ' ta</text>';
-    svg += '<text x="' + (legX + 8) + '" y="' + (infoY + 28) + '" font-size="8" fill="#475569">Devorlar: ' + walls.length + ' ta</text>';
-    svg += '<text x="' + (legX + 8) + '" y="' + (infoY + 40) + '" font-size="8" fill="#475569">Jami panellar: ' + data.totalPanels + '</text>';
-    svg += '<text x="' + (legX + 8) + '" y="' + (infoY + 52) + '" font-size="8" fill="#475569">Panel: ' + Math.round(getPanelWidth()*1000) + 'x' + Math.round(getH()*1000) + ' mm</text>';
-
-    svg += '</svg>';
-    return svg;
-}
-
-function buildDrawingCard(w) {
-    const len = wallLength(w);
-    const H = w.height || getH();
-    const doorList = doors.filter(d => d.wallId === w.id);
-    const isInner = !!w.isInner;
-
-    const card = document.createElement('div');
-    card.className = 'wall-drawing-card';
-
-    const title = document.createElement('div');
-    title.className = 'wd-title';
-    const doorNote = doorList.length > 0 ? doorList.length + ' ta eshik bilan' : 'eshiksiz';
-    const icon = isInner ? 'fa-house' : 'fa-building-shield';
-    title.innerHTML = '<span><i class="fa-solid ' + icon + '"></i> ' + (isInner ? "Ichki bo'luvchi" : 'Tashqi') + ' devor #' + w.id + ' — ' + doorNote + '</span><span>' + Math.round(len*1000) + 'x' + Math.round(H*1000) + ' mm</span>';
-    card.appendChild(title);
-
-    const wrap = document.createElement('div');
-    wrap.className = 'wd-svg-wrap';
-    wrap.innerHTML = buildWallSVG(w, len, H, doorList);
-    card.appendChild(wrap);
-
-    const detailDiv = document.createElement('div');
-    detailDiv.className = 'wd-coords';
-    detailDiv.style.background = '#f0fdf4';
-    detailDiv.style.borderTop = '2px solid #22c55e';
-
-    const segments = computeWallSegments(len);
-    const cornerCount = segments.filter(s => s.label === 'burchak').length;
-    const stdCount = segments.filter(s => s.label.startsWith('M')).length;
-    const remCount = segments.filter(s => s.label === 'qoldiq').length;
-    let detailHTML = `
-        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:9px;">
-            <span style="background:#e2e8f0;padding:1px 6px;border-radius:3px;"><i class="fa-solid fa-location-dot"></i> A(${w.x1.toFixed(2)}, ${w.z1.toFixed(2)}) → B(${w.x2.toFixed(2)}, ${w.z2.toFixed(2)})</span>
-            <span style="background:#e2e8f0;padding:1px 6px;border-radius:3px;"><i class="fa-solid fa-ruler"></i> ${Math.round(len*1000)}x${Math.round(H*1000)} mm</span>
-    `;
-    if (isInner) {
-        detailHTML += '<span style="background:#dbeafe;padding:1px 6px;border-radius:3px;"><i class="fa-solid fa-house"></i> Ichki bo\'luvchi devor (120mm)</span>';
-    } else {
-        detailHTML += '<span style="background:#dbeafe;padding:1px 6px;border-radius:3px;"><i class="fa-solid fa-building-shield"></i> Tashqi yuk ko\'taruvchi devor (200mm)</span>';
-    }
-    detailHTML += '</div>';
-
-    detailHTML += '<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:9px;margin-top:4px;">';
-    detailHTML += '<span>Burchak panellari: ' + cornerCount + ' ta</span>';
-    detailHTML += '<span>Standart panellar: ' + stdCount + ' ta</span>';
-    if (remCount) detailHTML += '<span>Qoldiq: ' + remCount + ' ta</span>';
-    detailHTML += '<span>Eshiklar: ' + doorList.length + ' ta</span>';
-    detailHTML += '</div>';
-
-    if (doorList.length > 0) {
-        detailHTML += '<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:9px;margin-top:2px;color:#64748b;">';
-        doorList.forEach(d => {
-            const topH = H - d.height;
-            detailHTML += '<span>Eshik #' + d.id + ': ' + Math.round(d.width*1000) + 'x' + Math.round(d.height*1000) + 'mm, usti: ' + Math.round(d.width*1000) + 'x' + Math.round(topH*1000) + 'mm</span>';
-        });
-        detailHTML += '</div>';
-    }
-
-    detailHTML += '<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:9px;margin-top:2px;color:#475569;border-top:1px dashed #cbd5e1;padding-top:4px;">';
-    detailHTML += '<span>Mustahkamlovchi: ' + (isInner ? 'O8 A-III' : 'O12 A-III') + '</span>';
-    detailHTML += '<span>To\'ldiruvchi: ' + (isInner ? 'Gazobeton D500' : 'Kengaytirilgan loy') + '</span>';
-    if (!isInner) {
-        detailHTML += '<span>Gidroizolyatsiya: 2 qavat</span>';
-    }
-    detailHTML += '</div>';
-
-    detailDiv.innerHTML = detailHTML;
-    card.appendChild(detailDiv);
-
-    return card;
-}
-
-function computeWallSegments(len) {
-    const cornerSize = getCornerSize();
-    const panelWidth = getPanelWidth();
-    const segments = [];
-
-    if (len <= cornerSize * 2 + 0.05) {
-        segments.push({ label: 'burchak', width: len / 2 });
-        segments.push({ label: 'burchak', width: len / 2 });
-        return segments;
-    }
-
-    segments.push({ label: 'burchak', width: cornerSize });
-    const mainLen = len - cornerSize * 2;
-    const stdCount = Math.floor(mainLen / panelWidth + 1e-6);
-    const remainder = mainLen - stdCount * panelWidth;
-
-    let mIdx = 1;
-    for (let i = 0; i < stdCount; i++) {
-        segments.push({ label: 'M' + mIdx, width: panelWidth });
-        mIdx++;
-    }
-    if (remainder > 0.01) {
-        segments.push({ label: 'qoldiq', width: remainder });
-    }
-    segments.push({ label: 'burchak', width: cornerSize });
-    return segments;
-}
-
-function buildWallSVG(w, len, H, doorList) {
-    const pad = 40, svgW = 460;
-    const drawW = svgW - pad * 2;
-    const scale = len > 0 ? drawW / len : 1;
-    const wallH = Math.min(150, Math.max(60, H * scale * 0.5));
-    const dimRowH = 34;
-    const svgH = wallH + pad * 2 + dimRowH + 6;
-    const x0 = pad, y0 = pad, y1 = y0 + wallH;
-
-    let svg = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" xmlns="http://www.w3.org/2000/svg">';
-    svg += '<rect width="' + svgW + '" height="' + svgH + '" fill="#fff"/>';
-    svg += '<rect x="' + x0 + '" y="' + y0 + '" width="' + (len * scale) + '" height="' + wallH + '" fill="#ffffff" stroke="#111827" stroke-width="1.6"/>';
-    svg += '<rect x="' + (x0 + 2) + '" y="' + (y0 + 2) + '" width="' + (len * scale - 4) + '" height="' + (wallH - 4) + '" fill="none" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4,4"/>';
-    
-    for (let i = 0; i <= Math.floor(len / 0.5); i++) {
-        const px = x0 + i * 0.5 * scale;
-        if (px > x0 && px < x0 + len * scale) {
-            svg += '<line x1="' + px + '" y1="' + (y0 + 4) + '" x2="' + px + '" y2="' + (y1 - 4) + '" stroke="#e2e8f0" stroke-width="0.3" stroke-dasharray="2,4"/>';
-        }
-    }
-
-    svg += '<text x="' + (x0 + (len*scale)/2) + '" y="' + (y0 + wallH/2) + '" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="700" letter-spacing="2" transform="rotate(-90 ' + (x0 + (len*scale)/2) + ' ' + (y0 + wallH/2) + ')">H-' + Math.round(H*1000) + '</text>';
-
-    const segments = computeWallSegments(len);
-    let cursor = x0;
-    const tickTop = y0 - 8;
-
-    svg += '<line x1="' + x0 + '" y1="' + tickTop + '" x2="' + (x0 + len*scale) + '" y2="' + tickTop + '" stroke="#111827" stroke-width="1"/>';
-
-    segments.forEach(seg => {
-        const segW = seg.width * scale;
-        svg += '<line x1="' + cursor + '" y1="' + (tickTop - 5) + '" x2="' + cursor + '" y2="' + (tickTop + 5) + '" stroke="#111827" stroke-width="1"/>';
-        svg += '<line x1="' + cursor + '" y1="' + y0 + '" x2="' + cursor + '" y2="' + y1 + '" stroke="#cbd5e1" stroke-width="0.6" stroke-dasharray="2,3"/>';
-        
-        const cx = cursor + segW / 2;
-        if (seg.label === 'burchak') {
-            svg += '<rect x="' + (cursor + 2) + '" y="' + (y0 + 2) + '" width="' + (segW - 4) + '" height="' + (wallH - 4) + '" fill="#dbeafe" opacity="0.3" rx="2"/>';
-            svg += '<text x="' + cx + '" y="' + (y0 + 14) + '" font-size="6" fill="#2563eb" text-anchor="middle">BURCHAK</text>';
-        } else if (seg.label.startsWith('M')) {
-            svg += '<rect x="' + (cursor + 2) + '" y="' + (y0 + 2) + '" width="' + (segW - 4) + '" height="' + (wallH - 4) + '" fill="#f0fdf4" opacity="0.3" rx="2"/>';
-            svg += '<text x="' + cx + '" y="' + (y0 + 14) + '" font-size="6" fill="#16a34a" text-anchor="middle">' + seg.label + '</text>';
-        } else if (seg.label === 'qoldiq') {
-            svg += '<rect x="' + (cursor + 2) + '" y="' + (y0 + 2) + '" width="' + (segW - 4) + '" height="' + (wallH - 4) + '" fill="#fef3c7" opacity="0.3" rx="2"/>';
-            svg += '<text x="' + cx + '" y="' + (y0 + 14) + '" font-size="6" fill="#d97706" text-anchor="middle">QOLDIQ</text>';
-        }
-        cursor += segW;
-    });
-    svg += '<line x1="' + cursor + '" y1="' + (tickTop - 5) + '" x2="' + cursor + '" y2="' + (tickTop + 5) + '" stroke="#111827" stroke-width="1"/>';
-
-    doorList.forEach(d => {
-        const cx = x0 + (d.t * len) * scale;
-        const dw = Math.min(d.width * scale, len * scale);
-        const dl = Math.max(x0, cx - dw / 2);
-        const dr = Math.min(x0 + len * scale, cx + dw / 2);
-        const doorHR = Math.min(1, d.height / H);
-        const dt = y1 - wallH * doorHR;
-        
-        svg += '<rect x="' + dl + '" y="' + y0 + '" width="' + (dr - dl) + '" height="' + (dt - y0) + '" fill="#f3f4f6" stroke="#9ca3af" stroke-width="0.8"/>';
-        for (let hy = y0; hy < dt; hy += 6) {
-            svg += '<line x1="' + dl + '" y1="' + hy + '" x2="' + Math.min(dl+8,dr) + '" y2="' + Math.max(y0,hy-6) + '" stroke="#9ca3af" stroke-width="0.5"/>';
-        }
-        svg += '<text x="' + cx + '" y="' + ((y0+dt)/2+3) + '" font-size="7" fill="#4b5563" text-anchor="middle">USTI: ' + Math.round(d.width*1000) + 'x' + Math.round((H-d.height)*1000) + '</text>';
-        
-        svg += '<rect x="' + dl + '" y="' + dt + '" width="' + (dr - dl) + '" height="' + (y1 - dt) + '" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>';
-        svg += '<line x1="' + dl + '" y1="' + y1 + '" x2="' + dl + '" y2="' + dt + '" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>';
-        svg += '<line x1="' + dl + '" y1="' + y1 + '" x2="' + dr + '" y2="' + dt + '" stroke="#dc2626" stroke-width="1.2"/>';
-        svg += '<text x="' + ((dl+dr)/2 - 3) + '" y="' + ((y1+dt)/2) + '" font-size="7" fill="#dc2626" font-weight="700" text-anchor="middle" transform="rotate(-70 ' + ((dl+dr)/2 - 3) + ' ' + ((y1+dt)/2) + ')">ESHIK ' + Math.round(d.width*1000) + 'x' + Math.round(d.height*1000) + '</text>';
-        svg += '<text x="' + cx + '" y="' + (dt - 4) + '" font-size="6" fill="#92400e" text-anchor="middle">D' + d.id + '</text>';
-    });
-
-    const dimY = y1 + 14;
-    svg += '<line x1="' + x0 + '" y1="' + dimY + '" x2="' + (x0 + len * scale) + '" y2="' + dimY + '" stroke="#111827" stroke-width="1"/>';
-
-    cursor = x0;
-    segments.forEach(seg => {
-        const segW = seg.width * scale;
-        const cx = cursor + segW / 2;
-        svg += '<line x1="' + cursor + '" y1="' + (dimY - 4) + '" x2="' + cursor + '" y2="' + (dimY + 4) + '" stroke="#111827" stroke-width="1"/>';
-        svg += '<text x="' + cx + '" y="' + (dimY - 7) + '" font-size="7.5" fill="#111827" text-anchor="middle" font-weight="600">' + Math.round(seg.width * 1000) + '</text>';
-        svg += '<text x="' + cx + '" y="' + (dimY + 16) + '" font-size="6.5" fill="#6b7280" text-anchor="middle">' + seg.label + '</text>';
-        cursor += segW;
-    });
-    svg += '<line x1="' + cursor + '" y1="' + (dimY - 4) + '" x2="' + cursor + '" y2="' + (dimY + 4) + '" stroke="#111827" stroke-width="1"/>';
-
-    svg += '<text x="' + x0 + '" y="' + (y1 + 36) + '" font-size="8" fill="#2563eb" font-weight="700">A</text>';
-    svg += '<text x="' + (x0 + len*scale) + '" y="' + (y1 + 36) + '" font-size="8" fill="#dc2626" font-weight="700">B</text>';
-
-    svg += '<text x="' + (x0 + (len * scale)/2) + '" y="' + (y0 - 16) + '" font-size="10" fill="#0f172a" text-anchor="middle" font-weight="700">' + Math.round(len * 1000) + ' mm</text>';
-    svg += '<text x="' + (x0 - 6) + '" y="' + ((y0+y1)/2) + '" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="700" transform="rotate(-90 ' + (x0-6) + ' ' + ((y0+y1)/2) + ')">H-' + Math.round(H*1000) + '</text>';
-    
-    const isInner = w.isInner || false;
-    svg += '<text x="' + (x0 + len * scale + 8) + '" y="' + (y0 + 10) + '" font-size="7" fill="' + (isInner ? '#64748b' : '#2563eb') + '" font-weight="600">' + (isInner ? 'ICHKI' : 'TASHQI') + '</text>';
-
-    svg += '</svg>';
-    return svg;
-}
-
-// ===== EKSPORT =====
-function exportDrawingsSVG() {
-    const container = document.getElementById('wallDrawingsContainer');
-    const allSvgs = container.querySelectorAll('svg');
-    if (allSvgs.length === 0) { alert('Hali chizma yoq!'); return; }
-    
-    let offsetY = 0, gap = 16, totalH = 0, maxW = 0, parts = [];
-    allSvgs.forEach(svg => {
-        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
-        const w = vb[2], h = vb[3];
-        parts.push({ inner: svg.innerHTML, w, h, y: offsetY });
-        offsetY += h + gap;
-        totalH = offsetY;
-        maxW = Math.max(maxW, w);
-    });
-    let combined = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + maxW + ' ' + totalH + '" width="' + maxW + '" height="' + totalH + '">';
-    combined += '<rect width="' + maxW + '" height="' + totalH + '" fill="#fff"/>';
-    parts.forEach(p => { combined += '<g transform="translate(0, ' + p.y + ')">' + p.inner + '</g>'; });
-    combined += '</svg>';
-
-    const blob = new Blob([combined], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'loyiha_chizmalari.svg';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-async function exportDrawingsPNG() {
-    const container = document.getElementById('wallDrawingsContainer');
-    if (container.children.length === 0) { alert('Hali chizma yoq!'); return; }
-    try {
-        const canvas = await html2canvas(container, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            width: 800,
-            height: container.scrollHeight
-        });
-        const link = document.createElement('a');
-        link.download = 'loyiha_chizmalari.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    } catch(e) {
-        alert('PNG eksport qilishda xatolik: ' + e.message);
-    }
-}
-
-function exportDXF() {
-    if (walls.length === 0) { alert('Hali devor yoq!'); return; }
-    let dxf = '0\nSECTION\n2\nHEADER\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n';
-    
-    walls.forEach((w) => {
-        const isInner = w.isInner || false;
-        const color = isInner ? 8 : 5;
-        dxf += '0\nLINE\n8\n' + (isInner ? 'INNER' : 'OUTER') + '\n6\nCONTINUOUS\n';
-        dxf += '10\n' + w.x1 + '\n20\n' + w.z1 + '\n30\n0.0\n';
-        dxf += '11\n' + w.x2 + '\n21\n' + w.z2 + '\n31\n0.0\n';
-        dxf += '62\n' + color + '\n';
-    });
-
-    doors.forEach((d) => {
-        const w = walls.find(ww => ww.id === d.wallId);
-        if (!w) return;
-        const pos = pointAlongWall(w, d.t);
-        const halfW = d.width / 2;
-        const angle = wallAngle(w);
-        const x1 = pos.x - Math.cos(angle) * halfW;
-        const z1 = pos.z - Math.sin(angle) * halfW;
-        const x2 = pos.x + Math.cos(angle) * halfW;
-        const z2 = pos.z + Math.sin(angle) * halfW;
-        dxf += '0\nLINE\n8\nDOOR\n6\nDASHED\n';
-        dxf += '10\n' + x1 + '\n20\n' + z1 + '\n30\n0.0\n';
-        dxf += '11\n' + x2 + '\n21\n' + z2 + '\n31\n0.0\n';
-        dxf += '62\n1\n';
-    });
-
-    dxf += '0\nENDSEC\n0\nEOF\n';
-    
-    const blob = new Blob([dxf], { type: 'application/dxf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'loyiha.dxf';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function exportData() {
-    if (walls.length === 0) { alert('Hali ma\'lumot yoq!'); return; }
-    const data = {
-        project: {
-            name: 'Qurilish Loyihasi',
-            date: new Date().toISOString(),
-            version: '2.0'
-        },
-        building: {
-            length: getL(),
-            width: getW(),
-            height: getH(),
-            wallThickness: getT(),
-            panelWidth: getPanelWidth(),
-            cornerSize: getCornerSize()
-        },
-        walls: walls.map(w => ({
-            id: w.id,
-            x1: w.x1, z1: w.z1,
-            x2: w.x2, z2: w.z2,
-            isInner: w.isInner || false,
-            length: wallLength(w),
-            angle: wallAngle(w)
-        })),
-        doors: doors.map(d => ({
-            id: d.id,
-            wallId: d.wallId,
-            t: d.t,
-            width: d.width,
-            height: d.height
-        })),
-        panels: calculatePanels()
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'loyiha_malumotlari.json';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-async function exportPDF() {
-    const container = document.getElementById('wallDrawingsContainer');
-    let drawingsHTML = '';
-    if (container.children.length > 0) {
-        container.querySelectorAll('.overview-card, .wall-drawing-card').forEach(card => {
-            drawingsHTML += card.outerHTML;
-        });
-    } else {
-        drawingsHTML = '<p style="color:#94a3b8;">Chizmalar mavjud emas</p>';
-    }
-
-    const printWindow = window.open('', '_blank', 'width=900,height=700');
-    if (!printWindow) {
-        alert('Brauzer popup oynasini blokladi. Iltimos, ushbu sayt uchun popup blokerni ochib qoying.');
-        return;
-    }
-    printWindow.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Qurilish Loyihasi</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>*{box-sizing:border-box;}body{font-family:"Segoe UI",Arial,sans-serif;padding:20px;color:#1e293b;max-width:1100px;margin:0 auto;}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #3b82f6;padding-bottom:12px;margin-bottom:20px;}.header h1{margin:0;font-size:22px;color:#0f172a;}.header .meta{font-size:12px;color:#64748b;text-align:right;}.section{margin:20px 0;}.section h2{font-size:14px;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:6px;margin-bottom:12px;}.overview-card{border:2px solid #3b82f6;border-radius:8px;margin-bottom:16px;overflow:hidden;background:#fff;}.overview-card .ov-title{background:#eff6ff;padding:6px 12px;font-size:13px;font-weight:700;border-bottom:1px solid #bfdbfe;display:flex;justify-content:space-between;}.overview-card .ov-svg-wrap{padding:8px;background:#fff;overflow:auto;text-align:center;}.overview-card .ov-svg-wrap svg{max-width:100%;height:auto;}.wall-drawing-card{border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden;background:#fff;}.wall-drawing-card .wd-title{background:#f8fafc;padding:5px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;}.wall-drawing-card .wd-svg-wrap{padding:8px;background:#fff;overflow:auto;text-align:center;}.wall-drawing-card .wd-svg-wrap svg{max-width:100%;height:auto;}.wall-drawing-card .wd-coords{font-size:10px;color:#475569;padding:4px 12px 8px 12px;background:#fafafa;border-top:1px dashed #e2e8f0;}.wall-drawing-card .wd-coords div{padding:1px 0;}.footer{margin-top:30px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center;}@media print{body{padding:10px;}}</style></head><body><div class="header"><h1><i class="fa-solid fa-trowel-bricks"></i> Qurilish Loyihasi</h1><div class="meta"><div>Sana: ' + new Date().toLocaleDateString() + '</div><div>Loyiha ID: #' + Date.now().toString().slice(-6) + '</div></div></div><div class="section"><h2><i class="fa-solid fa-ruler"></i> Bino parametrlari</h2><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"><div style="background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#64748b;text-transform:uppercase;">Uzunlik</div><div style="font-size:16px;font-weight:700;">' + getL().toFixed(1) + ' m</div></div><div style="background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#64748b;text-transform:uppercase;">Eni</div><div style="font-size:16px;font-weight:700;">' + getW().toFixed(1) + ' m</div></div><div style="background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#64748b;text-transform:uppercase;">Balandlik</div><div style="font-size:16px;font-weight:700;">' + getH().toFixed(1) + ' m</div></div><div style="background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#64748b;text-transform:uppercase;">Jami panellar</div><div style="font-size:16px;font-weight:700;">' + calculatePanels().totalPanels + '</div></div></div></div><div class="section"><h2><i class="fa-solid fa-ruler-combined"></i> LOYIHA CHIZMALARI</h2>' + drawingsHTML + '</div><div class="footer">EcoProm Construction — Professional qurilish hisoblash tizimi v2.0</div><script>setTimeout(() => { window.print(); }, 800);<\/script></body></html>');
-    printWindow.document.close();
-}
-
-function manualSaveToLocalStorage() {
-    try {
-        const data = {
-            walls: JSON.parse(JSON.stringify(walls)),
-            doors: JSON.parse(JSON.stringify(doors)),
-            wallCounter: wallCounter,
-            doorCounter: doorCounter,
-            selectedWallId: selectedWallId,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('qurilish_konstruktori_data', JSON.stringify(data));
-        alert('Loyiha saqlandi!');
-        return true;
-    } catch(e) {
-        alert('Saqlashda xatolik: ' + e.message);
-        return false;
-    }
-}
-
-// ===== BUILD FUNCTIONS =====
-function build3ChamberBuilding() {
-    const L = getL(), W = getW();
-    walls = []; doors = []; wallCounter = 0; doorCounter = 0; selectedWallId = null;
-
-    addWall(0, 0, L, 0);
-    addWall(L, 0, L, W);
-    addWall(L, W, 0, W);
-    addWall(0, W, 0, 0);
-
-    const chamberWidth = L / 3;
-    addWall(chamberWidth, 0, chamberWidth, W, true);
-    addWall(chamberWidth * 2, 0, chamberWidth * 2, W, true);
-
-    const doorW = 0.96, doorH = 2.0;
-    [0.166, 0.5, 0.833].forEach(t => {
-        doors.push({ id: doorCounter++, wallId: 0, t: t, width: doorW, height: doorH });
-    });
-
-    controls.target.set(L / 2, getH() / 2, W / 2);
-    controls.update();
-    rebuildScene();
-    saveState();
-}
-
-function buildSimpleBuilding() {
-    const L = getL() * 0.7, W = getW() * 0.7;
-    walls = []; doors = []; wallCounter = 0; doorCounter = 0; selectedWallId = null;
-
-    addWall(0, 0, L, 0);
-    addWall(L, 0, L, W);
-    addWall(L, W, 0, W);
-    addWall(0, W, 0, 0);
-
-    controls.target.set(L / 2, getH() / 2, W / 2);
-    controls.update();
-    rebuildScene();
-    saveState();
-}
-
-function buildLShapeBuilding() {
-    const L = getL() * 0.8, W = getW() * 0.8;
-    walls = []; doors = []; wallCounter = 0; doorCounter = 0; selectedWallId = null;
-
-    addWall(0, 0, L, 0);
-    addWall(L, 0, L, W * 0.5);
-    addWall(L, W * 0.5, L * 0.5, W * 0.5);
-    addWall(L * 0.5, W * 0.5, L * 0.5, W);
-    addWall(L * 0.5, W, 0, W);
-    addWall(0, W, 0, 0);
-
-    controls.target.set(L / 2, getH() / 2, W / 2);
-    controls.update();
-    rebuildScene();
-    saveState();
-}
-
-// ===== EVENTLAR =====
-document.getElementById('buildRectBtn').addEventListener('click', () => {
-    if (walls.length > 0 && !confirm('Joriy devorlar almashtiriladi. Davom?')) return;
-    build3ChamberBuilding();
-});
-
-document.getElementById('buildSimpleBtn').addEventListener('click', () => {
-    if (walls.length > 0 && !confirm('Joriy devorlar almashtiriladi. Davom?')) return;
-    buildSimpleBuilding();
-});
-
-document.getElementById('buildLShapeBtn').addEventListener('click', () => {
-    if (walls.length > 0 && !confirm('Joriy devorlar almashtiriladi. Davom?')) return;
-    buildLShapeBuilding();
-});
-
-document.getElementById('addWallManual').addEventListener('click', () => {
-    const x1 = parseFloat(document.getElementById('wx1').value);
-    const z1 = parseFloat(document.getElementById('wz1').value);
-    const x2 = parseFloat(document.getElementById('wx2').value);
-    const z2 = parseFloat(document.getElementById('wz2').value);
-    if ([x1, z1, x2, z2].some(v => isNaN(v))) { alert('Koordinatalar noto\'g\'ri!'); return; }
-    addWall(x1, z1, x2, z2);
-    saveState();
-});
-
-document.getElementById('updateWallBtn').addEventListener('click', () => {
-    if (selectedWallId === null) { alert('Avval devorni tanlang!'); return; }
-    const x1 = parseFloat(document.getElementById('editX1').value);
-    const z1 = parseFloat(document.getElementById('editZ1').value);
-    const x2 = parseFloat(document.getElementById('editX2').value);
-    const z2 = parseFloat(document.getElementById('editZ2').value);
-    if ([x1, z1, x2, z2].some(v => isNaN(v))) { alert('Koordinatalar noto\'g\'ri!'); return; }
-    
-    const w = walls.find(ww => ww.id === selectedWallId);
-    if (!w) return;
-    
-    if (Math.hypot(x2 - x1, z2 - z1) < 0.05) { alert('Devor juda qisqa!'); return; }
-    
-    w.x1 = round2(x1);
-    w.z1 = round2(z1);
-    w.x2 = round2(x2);
-    w.z2 = round2(z2);
-    rebuildScene();
-    saveState();
-    alert('Devor yangilandi!');
-});
-
-document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
-    if (selectedWallId === null) { alert('Avval devorni tanlang!'); return; }
-    if (confirm('Tanlangan devorni o\'chirish?')) {
-        removeWallById(selectedWallId);
-        saveState();
-    }
-});
-
-document.getElementById('duplicateBtn').addEventListener('click', () => {
-    if (selectedWallId === null) { alert('Avval devorni tanlang!'); return; }
-    const w = walls.find(ww => ww.id === selectedWallId);
-    if (!w) return;
-    const offsetX = 0.8, offsetZ = 0.8;
-    addWall(w.x1 + offsetX, w.z1 + offsetZ, w.x2 + offsetX, w.z2 + offsetZ, w.isInner || false);
-    saveState();
-    alert('Devor dublikatlandi!');
-});
-
-document.getElementById('addDoorBtn').addEventListener('click', addDoor);
-document.getElementById('addMultipleDoorsBtn').addEventListener('click', () => addMultipleDoors(3));
-document.getElementById('undoWallBtn').addEventListener('click', removeLastWall);
-document.getElementById('undoDoorBtn').addEventListener('click', removeLastDoor);
-document.getElementById('clearBtn').addEventListener('click', () => { if (confirm('Hammasini tozalash?')) clearAll(); });
-
-document.getElementById('snapToggleBtn').addEventListener('click', () => {
-    snapEnabled = !snapEnabled;
-    document.getElementById('snapChk').checked = snapEnabled;
-    document.getElementById('snapToggleBtn').innerHTML = snapEnabled ? '<i class="fa-solid fa-link"></i> Snap' : '<i class="fa-solid fa-link-slash"></i> Snap';
-    document.getElementById('snapToggleBtn').className = snapEnabled ? 'secondary small' : 'danger small';
-});
-
-document.getElementById('snapChk').addEventListener('change', (e) => {
-    snapEnabled = e.target.checked;
-    document.getElementById('snapToggleBtn').innerHTML = snapEnabled ? '<i class="fa-solid fa-link"></i> Snap' : '<i class="fa-solid fa-link-slash"></i> Snap';
-    document.getElementById('snapToggleBtn').className = snapEnabled ? 'secondary small' : 'danger small';
-});
-
-document.getElementById('doorOffset').addEventListener('input', (e) => {
-    document.getElementById('doorOffsetLabel').textContent = e.target.value + '%';
-});
-
-document.getElementById('showSpecsBtn').addEventListener('click', () => {
-    document.getElementById('specsPanel').classList.toggle('open');
-    updateSpecs();
-});
-document.getElementById('showSpecsBtnMini').addEventListener('click', () => {
-    document.getElementById('specsPanel').classList.toggle('open');
-    updateSpecs();
-});
-document.getElementById('closeSpecs').addEventListener('click', () => {
-    document.getElementById('specsPanel').classList.remove('open');
-});
-
-document.getElementById('drawingToggleBtn').addEventListener('click', () => {
-    document.getElementById('drawingPanel').classList.toggle('open');
-    renderDrawings();
-});
-document.getElementById('closeDrawingPanel').addEventListener('click', () => {
-    document.getElementById('drawingPanel').classList.remove('open');
-});
-document.getElementById('drawingExportSVG').addEventListener('click', exportDrawingsSVG);
-document.getElementById('drawingExportPNG').addEventListener('click', exportDrawingsPNG);
-document.getElementById('drawingExportDXF').addEventListener('click', exportDXF);
-document.getElementById('exportPDFBtn').addEventListener('click', exportPDF);
-document.getElementById('exportDataBtn').addEventListener('click', exportData);
-
-document.getElementById('saveBtn').addEventListener('click', manualSaveToLocalStorage);
-
-document.getElementById('H_total').addEventListener('change', () => { syncWallDims(); rebuildScene(); saveState(); });
-document.getElementById('wallThickness').addEventListener('change', () => { syncWallDims(); rebuildScene(); saveState(); });
-document.getElementById('roofChk').addEventListener('change', () => { rebuildScene(); saveState(); });
-document.getElementById('floorChk').addEventListener('change', () => { rebuildScene(); saveState(); });
-document.getElementById('panelWidth').addEventListener('change', () => { updateUI(); updateSpecs(); });
-document.getElementById('cornerSize').addEventListener('change', () => { updateUI(); updateSpecs(); });
-
-document.getElementById('togglePanel').addEventListener('click', () => {
-    document.getElementById('panel').classList.toggle('collapsed');
-});
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// ===== ANIMATION =====
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-// ===== START =====
-const loaded = loadFromLocalStorage();
-if (!loaded) {
-    console.log('Yangi loyiha boshlanmoqda...');
-    build3ChamberBuilding();
-} else {
-    console.log('Saqlangan loyiha yuklandi');
-}
-
-animate();
-
-console.log('Qurilish Konstruktori v2.0 yuklandi!');
-console.log('Qisqa tugmalar:');
-console.log('  CTRL+Z - Bekor qilish');
-console.log('  CTRL+Y - Qaytarish');
-console.log('  CTRL+C - Nusxalash');
-console.log('  CTRL+V - Joylashtirish');
-console.log('  CTRL+D - Dublikat');
-console.log('  CTRL+X - Kesish');
-console.log('  Delete - O\'chirish');
-console.log('  ESC - Chizish rejimidan chiqish');
-console.log('Yangi funksiyalar:');
-console.log('  Snap (avtomatik ulash) - faqat devor oxirlariga');
-console.log('  3 xil bino shakli');
-console.log('  Dublikat (CTRL+D)');
-console.log('  Bir nechta eshik qoshish');
-console.log('  DXF eksport');
-console.log('  JSON ma\'lumotlar eksporti');
-console.log('  O\'lchamlar HUD da');
-</script>
+        window.addEventListener('load', initQuiz);
+    </script>
 </body>
 </html>
